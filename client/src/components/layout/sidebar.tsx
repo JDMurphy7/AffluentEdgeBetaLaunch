@@ -45,18 +45,18 @@ export default function Sidebar({ userId }: SidebarProps) {
             <i className="fas fa-plus-circle"></i>
             <span>Add Trade</span>
           </button>
-          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
+          <Link href="/trade-history" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/trade-history' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-history"></i>
             <span>Trade History</span>
-          </button>
-          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
+          </Link>
+          <Link href="/ai-analysis" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/ai-analysis' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-brain"></i>
             <span>AI Analysis</span>
-          </button>
-          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
+          </Link>
+          <Link href="/strategies" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/strategies' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-cog"></i>
             <span>Strategies</span>
-          </button>
+          </Link>
           <Link href="/community" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/community' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-users"></i>
             <span>Community</span>
@@ -65,10 +65,10 @@ export default function Sidebar({ userId }: SidebarProps) {
             <i className="fas fa-trophy"></i>
             <span>Leaderboard</span>
           </button>
-          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
+          <Link href="/profile" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/profile' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-user-circle"></i>
             <span>Profile</span>
-          </button>
+          </Link>
         </nav>
 
         {/* Strategy Quick Stats */}

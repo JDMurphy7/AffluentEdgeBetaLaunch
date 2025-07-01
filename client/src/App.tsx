@@ -7,6 +7,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Community from "@/pages/community";
+import TradeHistory from "@/pages/trade-history";
+import AIAnalysis from "@/pages/ai-analysis";
+import Strategies from "@/pages/strategies";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -15,6 +19,10 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/community" component={Community} />
+      <Route path="/trade-history" component={TradeHistory} />
+      <Route path="/ai-analysis" component={AIAnalysis} />
+      <Route path="/strategies" component={Strategies} />
+      <Route path="/profile" component={Profile} />
       <Route component={NotFound} />
     </Switch>
   );
