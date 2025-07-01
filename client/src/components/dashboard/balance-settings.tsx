@@ -11,11 +11,9 @@ export default function BalanceSettings({ userId, currentBalance, onBalanceUpdat
   const [inputBalance, setInputBalance] = useState(currentBalance.toString());
 
   const presetBalances = [
-    { label: 'FTMO $100K Challenge', value: 100000 },
-    { label: 'FTMO $200K Challenge', value: 200000 },
-    { label: 'MyForexFunds $25K', value: 25000 },
-    { label: 'PropFirm $50K', value: 50000 },
-    { label: 'Personal $10K', value: 10000 },
+    { label: '$25K Challenge', value: 25000 },
+    { label: '$50K Challenge', value: 50000 },
+    { label: '$100K Challenge', value: 100000 },
   ];
 
   const handleBalanceUpdate = (value: number) => {
