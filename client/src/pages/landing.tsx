@@ -5,17 +5,29 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import affluentEdgeLogo from "@assets/Affluent Edge (2)_1751360237178.png";
 
+interface BetaFormData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  residency: string;
+}
+
 export default function Landing() {
-  const [email, setEmail] = useState("");
+  const [formData, setFormData] = useState<BetaFormData>({
+    email: "",
+    firstName: "",
+    lastName: "",
+    residency: ""
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleBetaRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
+    if (!formData.email || !formData.firstName || !formData.lastName) {
       toast({
-        title: "Email Required",
-        description: "Please enter your email address to request beta access.",
+        title: "Required Fields Missing",
+        description: "Please fill in your email, first name, and last name.",
         variant: "destructive",
       });
       return;
@@ -29,7 +41,7 @@ export default function Landing() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
@@ -43,7 +55,12 @@ export default function Landing() {
         description: "You'll receive access instructions within 24 hours.",
       });
       
-      setEmail("");
+      setFormData({
+        email: "",
+        firstName: "",
+        lastName: "",
+        residency: ""
+      });
     } catch (error) {
       toast({
         title: "Submission Failed",
@@ -134,11 +151,39 @@ export default function Landing() {
             <p className="text-white/70 mb-6">Join elite traders using AffluentEdge</p>
             
             <form onSubmit={handleBetaRequest} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  type="text"
+                  placeholder="First Name"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
+                  disabled={isSubmitting}
+                />
+                <Input
+                  type="text"
+                  placeholder="Last Name"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
+                  disabled={isSubmitting}
+                />
+              </div>
+              
               <Input
                 type="email"
                 placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
+                disabled={isSubmitting}
+              />
+              
+              <Input
+                type="text"
+                placeholder="Country/Region (optional)"
+                value={formData.residency}
+                onChange={(e) => setFormData(prev => ({ ...prev, residency: e.target.value }))}
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
                 disabled={isSubmitting}
               />

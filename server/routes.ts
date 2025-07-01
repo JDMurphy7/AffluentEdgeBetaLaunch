@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { insertTradeSchema, insertUserSchema } from "@shared/schema";
 import { analyzeTradeWithAI, parseNaturalLanguageInput } from "./services/openai";
-import { simpleHubspotService } from "./services/hubspot-simple";
+import { hubspotService } from "./services/hubspot-simple";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
@@ -240,6 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: z.string().email("Invalid email address"),
         firstName: z.string().optional(),
         lastName: z.string().optional(),
+        residency: z.string().optional(),
         company: z.string().optional(),
         tradingExperience: z.string().optional(),
         assetClasses: z.array(z.string()).optional(),
@@ -249,7 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userData = betaRequestSchema.parse(req.body);
       
       // Check if contact already exists
-      const emailExists = await simpleHubspotService.checkSimpleEmailExists(userData.email);
+      const emailExists = await hubspotService.checkEmailExists(userData.email);
       if (emailExists) {
         return res.status(409).json({ 
           error: "Email already registered for beta access",
@@ -257,11 +258,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create contact in HubSpot
-      const contact = await simpleHubspotService.createSimpleContact(
+      // Create contact in HubSpot with geographic tracking
+      const contact = await hubspotService.createBetaContact(
         userData.email, 
         userData.firstName, 
-        userData.lastName
+        userData.lastName,
+        userData.residency
       );
       
       console.log(`Beta access request registered: ${userData.email}`);
