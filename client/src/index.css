@@ -172,6 +172,33 @@
     background: var(--charcoal) !important;
     color: var(--white) !important;
   }
+  
+  /* Landing page specific animations */
+  @keyframes floating {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes glow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  
+  .animate-floating {
+    animation: floating 6s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 4s ease-in-out infinite;
+  }
+  
+  /* Enhanced glassmorphism for landing */
+  .glass-morphism-hero {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
 }
 
 @layer utilities {

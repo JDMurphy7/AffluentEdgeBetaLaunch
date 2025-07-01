@@ -179,6 +179,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Beta access route
+  app.post("/api/beta-access", async (req, res) => {
+    try {
+      const betaRequestSchema = z.object({
+        email: z.string().email("Invalid email address"),
+      });
+
+      const { email } = betaRequestSchema.parse(req.body);
+      
+      // Log beta request (in production, this would be stored in database)
+      console.log(`Beta access request from: ${email}`);
+      
+      // In production, you would:
+      // 1. Store in database
+      // 2. Send confirmation email
+      // 3. Add to mailing list
+      // 4. Notify team
+      
+      res.json({ 
+        success: true, 
+        message: "Beta access request submitted successfully" 
+      });
+    } catch (error) {
+      console.error("Beta access error:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid email address provided" 
+        });
+      }
+      
+      res.status(500).json({ 
+        error: "Failed to submit beta access request" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
