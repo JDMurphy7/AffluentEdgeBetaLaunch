@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 export async function seedDemoUser() {
   try {
     // Check if demo user already exists
-    const existingUser = await db.select().from(users).where(eq(users.username, 'demo'));
+    const existingUser = await db.select().from(users).where(eq(users.email, 'demo@affluentedge.com'));
     
     if (existingUser.length > 0) {
       console.log("Demo user already exists, skipping seed");
@@ -16,11 +16,13 @@ export async function seedDemoUser() {
     
     // Create demo user
     const [demoUser] = await db.insert(users).values({
-      username: 'demo',
       email: 'demo@affluentedge.com',
       password: 'demo123', // In production, this would be hashed
+      firstName: 'Demo',
+      lastName: 'User',
       accountBalance: '127450.00',
-      customBalance: false
+      customBalance: false,
+      betaStatus: 'active'
     }).returning();
 
     // Create sample portfolio snapshots for equity curve (last 12 months)
