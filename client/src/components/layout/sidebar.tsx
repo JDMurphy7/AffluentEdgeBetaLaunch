@@ -1,15 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link, useLocation } from "wouter";
+import { User, StrategyPerformance } from "@/lib/types";
 
 interface SidebarProps {
   userId: number;
 }
 
 export default function Sidebar({ userId }: SidebarProps) {
-  const { data: user } = useQuery({
+  const [location] = useLocation();
+  
+  const { data: user } = useQuery<User>({
     queryKey: [`/api/user/${userId}`],
   });
 
-  const { data: strategies } = useQuery({
+  const { data: strategies } = useQuery<StrategyPerformance[]>({
     queryKey: [`/api/strategies/${userId}/performance`],
   });
 
@@ -33,34 +37,38 @@ export default function Sidebar({ userId }: SidebarProps) {
 
         {/* Navigation Menu */}
         <nav className="space-y-2">
-          <a href="#" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-gold bg-white/5">
+          <Link href="/dashboard" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/dashboard' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-chart-line"></i>
             <span>Dashboard</span>
-          </a>
-          <a href="#" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+          </Link>
+          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-plus-circle"></i>
             <span>Add Trade</span>
-          </a>
-          <a href="#" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+          </button>
+          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-history"></i>
             <span>Trade History</span>
-          </a>
-          <a href="#" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+          </button>
+          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-brain"></i>
             <span>AI Analysis</span>
-          </a>
-          <a href="#" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+          </button>
+          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-cog"></i>
             <span>Strategies</span>
-          </a>
-          <a href="#" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+          </button>
+          <Link href="/community" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/community' ? 'text-gold bg-white/5' : 'text-white'}`}>
+            <i className="fas fa-users"></i>
+            <span>Community</span>
+          </Link>
+          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-trophy"></i>
             <span>Leaderboard</span>
-          </a>
-          <a href="#" className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+          </button>
+          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-user-circle"></i>
             <span>Profile</span>
-          </a>
+          </button>
         </nav>
 
         {/* Strategy Quick Stats */}
