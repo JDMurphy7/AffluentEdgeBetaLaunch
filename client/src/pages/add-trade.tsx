@@ -57,7 +57,7 @@ export default function AddTrade() {
       stopLoss: "",
       takeProfit: "",
       quantity: "",
-      strategyId: "",
+      strategyId: "none",
       notes: "",
       entryTime: new Date().toISOString().slice(0, 16),
       exitTime: "",
@@ -69,7 +69,7 @@ export default function AddTrade() {
       const formattedData = {
         ...tradeData,
         userId: 1, // Demo user
-        strategyId: tradeData.strategyId ? parseInt(tradeData.strategyId) : undefined,
+        strategyId: (tradeData.strategyId && tradeData.strategyId !== "none") ? parseInt(tradeData.strategyId) : undefined,
         status: tradeData.exitPrice ? "closed" : "open",
       };
       
@@ -446,7 +446,7 @@ export default function AddTrade() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent className="bg-charcoal border-white/20">
-                                <SelectItem value="" className="text-white hover:bg-white/10">No Strategy</SelectItem>
+                                <SelectItem value="none" className="text-white hover:bg-white/10">No Strategy</SelectItem>
                                 {strategies?.map((strategy) => (
                                   <SelectItem 
                                     key={strategy.id} 
