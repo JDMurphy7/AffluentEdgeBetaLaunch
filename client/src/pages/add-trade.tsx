@@ -266,12 +266,12 @@ export default function AddTrade() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass-morphism border border-white/10 mb-6 h-16 p-1">
+          <TabsList className="grid w-full grid-cols-2 glass-morphism border border-white/10 mb-6 h-16 p-0 gap-0">
             <TabsTrigger 
               value="natural" 
-              className="data-[state=active]:bg-gold data-[state=active]:text-charcoal h-full w-full flex items-center justify-center rounded-md"
+              className="data-[state=active]:bg-gold data-[state=active]:text-charcoal h-full flex items-center justify-center rounded-l-md border-r border-white/10 data-[state=active]:border-r-gold/50"
             >
-              <div className="flex flex-col items-center justify-center space-y-1">
+              <div className="flex flex-col items-center justify-center space-y-1 px-4">
                 <div className="flex items-center">
                   <i className="fas fa-zap mr-2"></i>
                   Quick Upload
@@ -281,9 +281,9 @@ export default function AddTrade() {
             </TabsTrigger>
             <TabsTrigger 
               value="manual" 
-              className="data-[state=active]:bg-gold data-[state=active]:text-charcoal h-full w-full flex items-center justify-center rounded-md"
+              className="data-[state=active]:bg-gold data-[state=active]:text-charcoal h-full flex items-center justify-center rounded-r-md"
             >
-              <div className="flex flex-col items-center justify-center space-y-1">
+              <div className="flex flex-col items-center justify-center space-y-1 px-4">
                 <div className="flex items-center">
                   <i className="fas fa-cogs mr-2"></i>
                   Advanced Upload
