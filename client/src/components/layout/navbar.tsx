@@ -1,39 +1,92 @@
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 import logoPath from "@assets/Affluent Edge (2)_1751360237178.png";
+import { LogOut, User } from "lucide-react";
 
 export default function Navbar() {
+  const { user, logoutMutation } = useAuth();
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
   return (
     <nav className="fixed top-0 w-full z-50 glass-morphism border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              {/* AffluentEdge Official Logo */}
-              <div className="w-10 h-10 rounded-lg overflow-hidden">
-                <img 
-                  src={logoPath} 
-                  alt="AffluentEdge" 
-                  className="w-full h-full object-cover"
-                />
+            <Link href={user ? "/dashboard" : "/"}>
+              <div className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity">
+                {/* AffluentEdge Official Logo */}
+                <div className="w-10 h-10 rounded-lg overflow-hidden">
+                  <img 
+                    src={logoPath} 
+                    alt="AffluentEdge" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-xl font-bold text-gradient-gold">AffluentEdge</span>
               </div>
-              <span className="text-xl font-bold text-gradient-gold">AffluentEdge</span>
-            </div>
+            </Link>
           </div>
           
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-white hover:text-gold transition-colors">Dashboard</a>
-            <a href="#" className="text-white hover:text-gold transition-colors">Strategies</a>
-            <a href="#" className="text-white hover:text-gold transition-colors">Community</a>
-            <a href="#" className="text-white hover:text-gold transition-colors">Analytics</a>
-          </div>
+          {user && (
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/dashboard">
+                <a className="text-white hover:text-gold transition-colors">Dashboard</a>
+              </Link>
+              <Link href="/strategies">
+                <a className="text-white hover:text-gold transition-colors">Strategies</a>
+              </Link>
+              <Link href="/community">
+                <a className="text-white hover:text-gold transition-colors">Community</a>
+              </Link>
+              <Link href="/ai-analysis">
+                <a className="text-white hover:text-gold transition-colors">Analytics</a>
+              </Link>
+            </div>
+          )}
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 glass-morphism px-3 py-2 rounded-lg">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-muted-foreground">Live Account</span>
-            </div>
-            <div className="w-8 h-8 gradient-gold rounded-full flex items-center justify-center">
-              <i className="fas fa-user text-black text-sm"></i>
-            </div>
+            {user ? (
+              <>
+                {/* Live Account Status */}
+                <div className="flex items-center space-x-2 glass-morphism px-3 py-2 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-white/70">
+                    {user.betaStatus === 'active' ? 'Beta Active' : 'Live Account'}
+                  </span>
+                </div>
+                
+                {/* User Menu */}
+                <div className="flex items-center space-x-2">
+                  <Link href="/profile">
+                    <Button variant="ghost" size="sm" className="text-white hover:text-gold hover:bg-white/5">
+                      <User className="h-4 w-4 mr-2" />
+                      {user.firstName || user.email.split('@')[0]}
+                    </Button>
+                  </Link>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                    className="text-white hover:text-red-400 hover:bg-white/5"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              /* Login Button for Non-Authenticated Users */
+              <Link href="/auth">
+                <Button className="bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

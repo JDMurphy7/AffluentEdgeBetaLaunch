@@ -208,6 +208,19 @@ export default function Landing() {
             <p className="text-xs text-white/60 mt-4">
               Limited spots available. No spam, ever.
             </p>
+            
+            {/* Login Link */}
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <p className="text-xs text-white/60 mb-2">Already have beta access?</p>
+              <Link href="/auth">
+                <Button 
+                  variant="ghost" 
+                  className="w-full text-gold hover:text-gold/90 hover:bg-gold/5 border border-gold/20"
+                >
+                  Sign In to Your Account
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
