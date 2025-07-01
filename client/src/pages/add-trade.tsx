@@ -266,9 +266,9 @@ export default function AddTrade() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass-morphism border border-white/10 mb-6">
-            <TabsTrigger value="natural" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal">
-              <div className="flex flex-col items-center space-y-1">
+          <TabsList className="grid w-full grid-cols-2 glass-morphism border border-white/10 mb-6 h-16">
+            <TabsTrigger value="natural" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal h-full">
+              <div className="flex flex-col items-center justify-center space-y-1 py-2">
                 <div className="flex items-center">
                   <i className="fas fa-zap mr-2"></i>
                   Quick Upload
@@ -276,8 +276,8 @@ export default function AddTrade() {
                 <span className="text-xs opacity-80">Natural language & screenshots</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="manual" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal">
-              <div className="flex flex-col items-center space-y-1">
+            <TabsTrigger value="manual" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal h-full">
+              <div className="flex flex-col items-center justify-center space-y-1 py-2">
                 <div className="flex items-center">
                   <i className="fas fa-cogs mr-2"></i>
                   Advanced Upload
