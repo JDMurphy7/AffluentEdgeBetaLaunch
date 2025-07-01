@@ -14,6 +14,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Test HubSpot email
+  app.post('/api/test-hubspot-email', async (req, res) => {
+    try {
+      const { email, firstName } = req.body;
+      
+      console.log(`Testing HubSpot email send to: ${email}`);
+      
+      // Create and send email via HubSpot
+      const emailSent = await hubspotService.sendWelcomeEmail('test-contact', email, firstName);
+      
+      res.json({ 
+        success: true, 
+        message: 'HubSpot email test completed',
+        emailSent 
+      });
+    } catch (error) {
+      console.error('HubSpot email test failed:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to send test email',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Admin routes (placed before auth middleware to avoid interference)
   app.get("/api/admin/beta-applicants", async (req, res) => {
     console.log("ADMIN ROUTE HIT! Query:", req.query);
@@ -45,13 +70,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update status in HubSpot
       await hubspotService.updateBetaStatus(contactId, 'approved');
       
-      // Send welcome email to approved user
-      const loginUrl = emailService.generateLoginUrl(email);
-      const emailSent = await emailService.sendWelcomeEmail({
-        firstName: firstName || 'Trader',
-        email,
-        loginUrl,
-      });
+      // Send welcome email via HubSpot
+      const emailSent = await hubspotService.sendWelcomeEmail(contactId, email, firstName);
 
       if (emailSent) {
         console.log(`Welcome email sent to approved user: ${email}`);
