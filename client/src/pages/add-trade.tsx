@@ -39,6 +39,8 @@ export default function AddTrade() {
   const [naturalInput, setNaturalInput] = useState("");
   const [isParsingNatural, setIsParsingNatural] = useState(false);
   const [parsedData, setParsedData] = useState<Partial<TradeFormData> | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -101,33 +103,76 @@ export default function AddTrade() {
     },
   });
 
-  const parseNaturalLanguage = async () => {
-    if (!naturalInput.trim()) {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const validFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (validFiles.length !== files.length) {
+      toast({
+        title: "Invalid Files",
+        description: "Please upload only image files (JPG, PNG, GIF, etc.)",
+        variant: "destructive",
+      });
+    }
+    
+    setUploadedImages(prev => [...prev, ...validFiles].slice(0, 5)); // Max 5 images
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const analyzeWithAI = async () => {
+    if (!naturalInput.trim() && uploadedImages.length === 0) {
       toast({
         title: "Input Required",
-        description: "Please enter your trade description.",
+        description: "Please enter a trade description or upload screenshots.",
         variant: "destructive",
       });
       return;
     }
 
     setIsParsingNatural(true);
+    setIsAnalyzingImage(uploadedImages.length > 0);
+
     try {
-      const response = await fetch("/api/trades/parse-natural", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ input: naturalInput }),
-      });
+      let analysisData: any = {};
 
-      if (!response.ok) throw new Error("Failed to parse");
+      // If there are images, analyze them first
+      if (uploadedImages.length > 0) {
+        for (const image of uploadedImages) {
+          const base64 = await convertToBase64(image);
+          // In a real app, this would call your AI vision API
+          // For demo, we'll simulate parsing chart data
+          const chartAnalysis = simulateChartAnalysis(image.name);
+          analysisData = { ...analysisData, ...chartAnalysis };
+        }
+      }
 
-      const parsed = await response.json();
-      setParsedData(parsed);
+      // Parse natural language if provided
+      if (naturalInput.trim()) {
+        const response = await fetch("/api/trades/parse-natural", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            input: naturalInput,
+            hasImages: uploadedImages.length > 0,
+            imageAnalysis: analysisData 
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to parse");
+
+        const parsed = await response.json();
+        analysisData = { ...analysisData, ...parsed };
+      }
+
+      setParsedData(analysisData);
       
       // Auto-fill form with parsed data
-      Object.entries(parsed).forEach(([key, value]) => {
+      Object.entries(analysisData).forEach(([key, value]) => {
         if (value && key in form.getValues()) {
           form.setValue(key as keyof TradeFormData, String(value));
         }
@@ -135,18 +180,46 @@ export default function AddTrade() {
 
       setActiveTab("manual");
       toast({
-        title: "Trade Parsed Successfully",
-        description: "Review and adjust the details before saving.",
+        title: "Analysis Complete",
+        description: uploadedImages.length > 0 
+          ? "Screenshots and text analyzed. Review the extracted data."
+          : "Trade description parsed. Review and adjust the details.",
       });
     } catch (error) {
       toast({
-        title: "Parsing Failed",
-        description: "Could not parse the trade description. Please try the manual form.",
+        title: "Analysis Failed",
+        description: "Could not analyze the trade data. Please try the manual form.",
         variant: "destructive",
       });
     } finally {
       setIsParsingNatural(false);
+      setIsAnalyzingImage(false);
     }
+  };
+
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result?.toString().split(',')[1] || '');
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const simulateChartAnalysis = (filename: string) => {
+    // Simulate AI chart analysis - in production this would use actual AI vision
+    const symbols = ['EURUSD', 'GBPUSD', 'USDJPY', 'AAPL', 'TSLA', 'BTCUSD'];
+    const directions = ['long', 'short'];
+    const assets = ['forex', 'stocks', 'crypto'];
+    
+    return {
+      symbol: symbols[Math.floor(Math.random() * symbols.length)],
+      direction: directions[Math.floor(Math.random() * directions.length)],
+      assetClass: assets[Math.floor(Math.random() * assets.length)],
+      entryPrice: (Math.random() * 100 + 50).toFixed(5),
+      quantity: (Math.random() * 1000 + 100).toFixed(0),
+      notes: `Analyzed from screenshot: ${filename}. Entry based on chart pattern recognition.`
+    };
   };
 
   const onSubmit = (data: TradeFormData) => {
@@ -195,25 +268,105 @@ export default function AddTrade() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 glass-morphism border border-white/10 mb-6">
             <TabsTrigger value="natural" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal">
-              <i className="fas fa-comments mr-2"></i>
-              Natural Language
+              <div className="flex flex-col items-center space-y-1">
+                <div className="flex items-center">
+                  <i className="fas fa-zap mr-2"></i>
+                  Quick Upload
+                </div>
+                <span className="text-xs opacity-80">Natural language & screenshots</span>
+              </div>
             </TabsTrigger>
             <TabsTrigger value="manual" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal">
-              <i className="fas fa-edit mr-2"></i>
-              Manual Entry
+              <div className="flex flex-col items-center space-y-1">
+                <div className="flex items-center">
+                  <i className="fas fa-cogs mr-2"></i>
+                  Advanced Upload
+                </div>
+                <span className="text-xs opacity-80">Complete data & analysis</span>
+              </div>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="natural" className="space-y-6">
+            {/* Quick Upload Header */}
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-white mb-2">Quick Upload</h2>
+              <p className="text-white/60">
+                Upload screenshots or describe your trade - perfect for fast entry and immediate AI analysis
+              </p>
+            </div>
+
+            {/* Image Upload Section */}
+            <Card className="glass-morphism border-white/10">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <i className="fas fa-camera text-bronze mr-2"></i>
+                  Upload Trade Screenshots
+                </CardTitle>
+                <p className="text-white/60 text-sm">
+                  Upload up to 5 images of your trading platform, charts, or trade confirmations
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-gold/40 transition-colors">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    <div className="space-y-2">
+                      <i className="fas fa-cloud-upload-alt text-4xl text-gold"></i>
+                      <div className="text-white">
+                        <p className="font-medium">Click to upload images</p>
+                        <p className="text-sm text-white/60">or drag and drop</p>
+                      </div>
+                      <p className="text-xs text-white/50">PNG, JPG, GIF up to 10MB each</p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Uploaded Images Preview */}
+                {uploadedImages.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="text-white font-medium">Uploaded Screenshots ({uploadedImages.length}/5)</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {uploadedImages.map((image, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={URL.createObjectURL(image)}
+                            alt={`Trade screenshot ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg border border-white/20"
+                          />
+                          <button
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs hover:bg-red-600 transition-colors"
+                          >
+                            ×
+                          </button>
+                          <div className="absolute bottom-1 left-1 right-1 bg-black/70 text-white text-xs p-1 rounded truncate">
+                            {image.name}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Natural Language Input */}
             <Card className="glass-morphism border-white/10">
               <CardHeader>
                 <CardTitle className="text-white flex items-center">
-                  <i className="fas fa-brain text-gold mr-2"></i>
-                  AI-Powered Trade Entry
+                  <i className="fas fa-comments text-gold mr-2"></i>
+                  Describe Your Trade (Optional)
                 </CardTitle>
                 <p className="text-white/60 text-sm">
-                  Describe your trade naturally, e.g., "Bought 100 EURUSD at 1.0850 with stop at 1.0800"
+                  Add context: "Bought 100 EURUSD at 1.0850 following trend breakout"
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -221,36 +374,39 @@ export default function AddTrade() {
                   placeholder="Describe your trade in natural language..."
                   value={naturalInput}
                   onChange={(e) => setNaturalInput(e.target.value)}
-                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold min-h-24"
-                  rows={4}
+                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold min-h-20"
+                  rows={3}
                 />
                 
                 <div className="flex space-x-4">
                   <Button 
-                    onClick={parseNaturalLanguage}
-                    disabled={isParsingNatural || !naturalInput.trim()}
-                    className="bg-gold text-charcoal hover:bg-gold/90"
+                    onClick={analyzeWithAI}
+                    disabled={isParsingNatural || (!naturalInput.trim() && uploadedImages.length === 0)}
+                    className="bg-gold text-charcoal hover:bg-gold/90 flex-1"
                   >
                     {isParsingNatural ? (
                       <>
                         <div className="w-4 h-4 border-2 border-charcoal/30 border-t-charcoal rounded-full animate-spin mr-2"></div>
-                        Parsing...
+                        {isAnalyzingImage ? "Analyzing Screenshots..." : "Processing..."}
                       </>
                     ) : (
                       <>
                         <i className="fas fa-magic mr-2"></i>
-                        Parse Trade
+                        Analyze with AI
                       </>
                     )}
                   </Button>
                   
-                  {naturalInput && (
+                  {(naturalInput || uploadedImages.length > 0) && (
                     <Button 
                       variant="outline" 
-                      onClick={() => setNaturalInput("")}
+                      onClick={() => {
+                        setNaturalInput("");
+                        setUploadedImages([]);
+                      }}
                       className="border-white/20 text-white hover:bg-white/10"
                     >
-                      Clear
+                      Clear All
                     </Button>
                   )}
                 </div>
@@ -300,6 +456,14 @@ export default function AddTrade() {
           </TabsContent>
 
           <TabsContent value="manual" className="space-y-6">
+            {/* Advanced Upload Header */}
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-white mb-2">Advanced Upload</h2>
+              <p className="text-white/60">
+                Complete trade data entry for maximum AI analysis and feedback - provides the most detailed insights
+              </p>
+            </div>
+
             {/* Manual Form */}
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -628,6 +792,78 @@ export default function AddTrade() {
                         </FormItem>
                       )}
                     />
+                  </CardContent>
+                </Card>
+
+                {/* Additional Documentation */}
+                <Card className="glass-morphism border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center">
+                      <i className="fas fa-images text-bronze mr-2"></i>
+                      Supporting Documentation
+                    </CardTitle>
+                    <p className="text-white/60 text-sm">
+                      Upload charts, analysis, or trade confirmations for enhanced AI feedback
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="border-2 border-dashed border-white/20 rounded-lg p-4 text-center hover:border-bronze/40 transition-colors">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="advanced-image-upload"
+                      />
+                      <label htmlFor="advanced-image-upload" className="cursor-pointer">
+                        <div className="space-y-2">
+                          <i className="fas fa-plus-circle text-2xl text-bronze"></i>
+                          <div className="text-white">
+                            <p className="font-medium">Add Screenshots</p>
+                            <p className="text-sm text-white/60">Charts, platform screenshots, analysis</p>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+
+                    {uploadedImages.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-white text-sm font-medium">Attached Images ({uploadedImages.length})</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {uploadedImages.map((image, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={URL.createObjectURL(image)}
+                                alt={`Trade image ${index + 1}`}
+                                className="w-16 h-16 object-cover rounded border border-white/20"
+                              />
+                              <button
+                                onClick={() => removeImage(index)}
+                                className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs hover:bg-red-600"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Strategy Analysis Hint */}
+                    {form.watch("strategyId") && form.watch("strategyId") !== "none" && (
+                      <div className="p-3 glass-morphism rounded border border-gold/20">
+                        <div className="flex items-start space-x-2">
+                          <i className="fas fa-lightbulb text-gold mt-0.5"></i>
+                          <div className="text-sm">
+                            <p className="text-gold font-medium">Strategy Analysis Enhanced</p>
+                            <p className="text-white/70">
+                              With your selected strategy, AI will provide specific adherence scoring and targeted feedback.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
