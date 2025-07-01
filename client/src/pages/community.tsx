@@ -213,7 +213,7 @@ export default function Community() {
         </div>
 
         <Tabs defaultValue="profiles" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 glass-morphism border border-white/10">
+          <TabsList className="grid w-full grid-cols-2 backdrop-blur-md bg-white/5 border border-white/10 shadow-lg">
             <TabsTrigger value="profiles" className="data-[state=active]:bg-gold data-[state=active]:text-charcoal">
               Community Profiles
             </TabsTrigger>
@@ -226,7 +226,7 @@ export default function Community() {
             {/* Community Profile Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTraders.map((trader) => (
-                <div key={trader.id} className="glass-morphism p-6 rounded-xl border border-white/10 hover:border-gold/30 transition-all duration-300 relative">
+                <div key={trader.id} className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-gold/30 transition-all duration-300 shadow-2xl">
                   {/* AffluentEdge Brand Logo */}
                   <div className="absolute top-4 right-4 opacity-20 hover:opacity-40 transition-opacity">
                     <img
@@ -280,14 +280,15 @@ export default function Community() {
                   </div>
 
                   {/* Account Growth */}
-                  <div className="glass-morphism p-3 rounded-lg mb-4 border border-white/5">
-                    <div className="flex justify-between items-center">
+                  <div className="backdrop-blur-sm bg-white/5 border border-white/10 p-4 rounded-lg mb-4">
+                    <div className="flex justify-between items-center mb-1">
                       <span className="text-white/70 text-sm">Account Growth</span>
                       <span className={`text-sm font-medium ${trader.monthlyGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {trader.monthlyGrowth > 0 ? '+' : ''}{trader.monthlyGrowth}%
+                        Monthly: {trader.monthlyGrowth > 0 ? '+' : ''}{trader.monthlyGrowth}%
                       </span>
                     </div>
                     <div className="text-2xl font-bold text-white">+{trader.accountGrowth}%</div>
+                    <div className="text-white/50 text-xs mt-1">Total Growth</div>
                   </div>
 
                   {/* Strategies */}
@@ -305,7 +306,7 @@ export default function Community() {
 
           <TabsContent value="leaderboard" className="mt-6">
             {/* Top Performers Leaderboard */}
-            <div className="glass-morphism p-6 rounded-xl border border-white/10 relative">
+            <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 shadow-2xl relative">
               {/* AffluentEdge Brand Logo */}
               <div className="absolute top-4 right-4 opacity-20 hover:opacity-40 transition-opacity">
                 <img
