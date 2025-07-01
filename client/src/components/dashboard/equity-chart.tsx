@@ -10,7 +10,7 @@ interface EquityChartProps {
 export default function EquityChart({ userId }: EquityChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
-  const [initialBalance, setInitialBalance] = useState(100000);
+  const [initialBalance, setInitialBalance] = useState(127450);
 
   const { data: snapshots, isLoading } = useQuery({
     queryKey: [`/api/portfolio/${userId}/snapshots`],

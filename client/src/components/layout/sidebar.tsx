@@ -17,6 +17,16 @@ export default function Sidebar({ userId }: SidebarProps) {
     queryKey: [`/api/strategies/${userId}/performance`],
   });
 
+  // Demo fallback data to match equity chart
+  const demoUser = {
+    accountBalance: "127450.00",
+    email: "demo@affluentedge.com",
+    firstName: "Demo",
+    lastName: "Trader"
+  };
+
+  const displayUser = user || demoUser;
+
   return (
     <aside className="fixed left-0 top-16 h-full w-64 glass-morphism border-r border-white/20 p-6 sidebar-scrollbar overflow-y-auto">
       <div className="space-y-6">
@@ -24,7 +34,7 @@ export default function Sidebar({ userId }: SidebarProps) {
         <div className="glass-gold p-4 rounded-xl">
           <div className="text-sm text-gray-300 mb-1">Account Balance</div>
           <div className="text-2xl font-bold text-white">
-            ${user?.accountBalance ? parseFloat(user.accountBalance).toLocaleString('en-US', {
+            ${displayUser?.accountBalance ? parseFloat(displayUser.accountBalance).toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
             }) : '0.00'}
