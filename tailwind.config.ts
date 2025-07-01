@@ -11,6 +11,11 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        // AffluentEdge Brand Colors
+        gold: "var(--gold)",
+        bronze: "var(--bronze)", 
+        charcoal: "var(--charcoal)",
+        
         background: "var(--background)",
         foreground: "var(--foreground)",
         card: {

@@ -76,11 +76,29 @@
   * {
     @apply border-border;
   }
+  
+  /* Force dark theme globally */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  
+  * {
+    margin: 0;
+  }
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, var(--charcoal) 0%, #000000 50%, var(--dark-gray) 100%);
+    background: linear-gradient(135deg, var(--charcoal) 0%, #000000 50%, #0A0A0A 100%);
+    min-height: 100vh;
+  }
+  
+  html {
+    background: var(--charcoal);
+  }
+  
+  #root {
+    background: var(--charcoal);
     min-height: 100vh;
   }
 }
@@ -127,6 +145,32 @@
 
   .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--gold);
+  }
+  
+  /* Ensure all overlays and popups have dark backgrounds */
+  [data-radix-popper-content-wrapper] {
+    background: var(--charcoal) !important;
+  }
+  
+  /* Fix any white backgrounds that might appear */
+  .bg-white {
+    background: var(--charcoal) !important;
+  }
+  
+  /* Override any light backgrounds */
+  [style*="background: white"], [style*="background: #fff"], [style*="background: #ffffff"] {
+    background: var(--charcoal) !important;
+  }
+  
+  /* Chart.js canvas background fix */
+  canvas {
+    background: transparent !important;
+  }
+  
+  /* Any remaining white elements */
+  .bg-white, [data-theme="light"], .light-theme {
+    background: var(--charcoal) !important;
+    color: var(--white) !important;
   }
 }
 

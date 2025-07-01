@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -17,10 +18,17 @@ function Router() {
 }
 
 function App() {
+  // Force dark mode on the document
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+    document.body.style.background = '#0F0F0F';
+    document.documentElement.style.background = '#0F0F0F';
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-gradient-to-br from-charcoal via-black to-dark-gray text-white">
+        <div className="min-h-screen bg-charcoal text-white">
           <Toaster />
           <Router />
         </div>
