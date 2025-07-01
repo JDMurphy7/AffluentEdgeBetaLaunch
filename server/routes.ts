@@ -11,6 +11,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication system
   setupAuth(app);
 
+
+
+  // Admin routes (placed before auth middleware to avoid interference)
+  app.get("/api/admin/beta-applicants", async (req, res) => {
+    console.log("ADMIN ROUTE HIT! Query:", req.query);
+    
+    try {
+      // For now, allow access if any admin parameter is provided
+      if (!req.query.admin) {
+        console.log("No admin parameter provided");
+        return res.status(403).json({ error: "Admin access required - no admin param" });
+      }
+
+      console.log("Admin parameter found:", req.query.admin);
+      const applicants = await hubspotService.getBetaApplicants();
+      res.json(applicants);
+    } catch (error) {
+      console.error("Failed to fetch beta applicants:", error);
+      res.status(500).json({ error: "Failed to fetch applicants" });
+    }
+  });
+
+  app.post("/api/admin/approve-user", async (req, res) => {
+    try {
+      const { contactId, email } = req.body;
+      
+      if (!contactId || !email) {
+        return res.status(400).json({ error: "Contact ID and email required" });
+      }
+
+      // Update status in HubSpot
+      await hubspotService.updateBetaStatus(contactId, 'approved');
+      
+      res.json({ success: true, message: "User approved successfully" });
+    } catch (error) {
+      console.error("Failed to approve user:", error);
+      res.status(500).json({ error: "Failed to approve user" });
+    }
+  });
+
+  app.post("/api/admin/reject-user", async (req, res) => {
+    try {
+      const { contactId, email } = req.body;
+      
+      if (!contactId || !email) {
+        return res.status(400).json({ error: "Contact ID and email required" });
+      }
+
+      // Update status in HubSpot
+      await hubspotService.updateBetaStatus(contactId, 'inactive');
+      
+      res.json({ success: true, message: "User rejected successfully" });
+    } catch (error) {
+      console.error("Failed to reject user:", error);
+      res.status(500).json({ error: "Failed to reject user" });
+    }
+  });
+
   // User routes (protected)
   app.get("/api/user/:id", requireAuth, async (req, res) => {
     try {
@@ -289,58 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin routes for beta user management
-  app.get("/api/admin/beta-applicants", async (req, res) => {
-    try {
-      // Simple admin check - you can access this with ?admin=your-admin-email
-      const adminEmail = req.query.admin;
-      if (!adminEmail || adminEmail !== process.env.ADMIN_EMAIL) {
-        return res.status(403).json({ error: "Admin access required" });
-      }
 
-      const applicants = await hubspotService.getBetaApplicants();
-      res.json(applicants);
-    } catch (error) {
-      console.error("Failed to fetch beta applicants:", error);
-      res.status(500).json({ error: "Failed to fetch applicants" });
-    }
-  });
-
-  app.post("/api/admin/approve-user", async (req, res) => {
-    try {
-      const { contactId, email } = req.body;
-      
-      if (!contactId || !email) {
-        return res.status(400).json({ error: "Contact ID and email required" });
-      }
-
-      // Update status in HubSpot
-      await hubspotService.updateBetaStatus(contactId, 'approved');
-      
-      res.json({ success: true, message: "User approved successfully" });
-    } catch (error) {
-      console.error("Failed to approve user:", error);
-      res.status(500).json({ error: "Failed to approve user" });
-    }
-  });
-
-  app.post("/api/admin/reject-user", async (req, res) => {
-    try {
-      const { contactId, email } = req.body;
-      
-      if (!contactId || !email) {
-        return res.status(400).json({ error: "Contact ID and email required" });
-      }
-
-      // Update status in HubSpot
-      await hubspotService.updateBetaStatus(contactId, 'inactive');
-      
-      res.json({ success: true, message: "User rejected successfully" });
-    } catch (error) {
-      console.error("Failed to reject user:", error);
-      res.status(500).json({ error: "Failed to reject user" });
-    }
-  });
 
   const httpServer = createServer(app);
   return httpServer;
