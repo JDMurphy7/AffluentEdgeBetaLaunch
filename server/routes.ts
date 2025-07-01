@@ -2,13 +2,17 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertTradeSchema, insertUserSchema } from "@shared/schema";
+import { insertTradeSchema } from "@shared/schema";
 import { analyzeTradeWithAI, parseNaturalLanguageInput } from "./services/openai";
 import { hubspotService } from "./services/hubspot-simple";
+import { setupAuth, requireAuth, requireActiveBeta } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // User routes
-  app.get("/api/user/:id", async (req, res) => {
+  // Setup authentication system
+  setupAuth(app);
+
+  // User routes (protected)
+  app.get("/api/user/:id", requireAuth, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
       const user = await storage.getUser(userId);

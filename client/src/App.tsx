@@ -4,6 +4,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Community from "@/pages/community";
@@ -12,19 +14,58 @@ import AIAnalysis from "@/pages/ai-analysis";
 import Strategies from "@/pages/strategies";
 import Profile from "@/pages/profile";
 import AddTrade from "@/pages/add-trade";
+import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 
+function ProtectedRoute({ component: Component }: { component: () => JSX.Element }) {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-charcoal flex items-center justify-center">
+        <div className="flex items-center space-x-2 text-gold">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
+
+  return <Component />;
+}
+
 function Router() {
+  const { user } = useAuth();
+
   return (
     <Switch>
-      <Route path="/" component={Landing} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/community" component={Community} />
-      <Route path="/add-trade" component={AddTrade} />
-      <Route path="/trade-history" component={TradeHistory} />
-      <Route path="/ai-analysis" component={AIAnalysis} />
-      <Route path="/strategies" component={Strategies} />
-      <Route path="/profile" component={Profile} />
+      <Route path="/" component={user ? Dashboard : Landing} />
+      <Route path="/auth" component={AuthPage} />
+      <Route path="/dashboard">
+        <ProtectedRoute component={Dashboard} />
+      </Route>
+      <Route path="/community">
+        <ProtectedRoute component={Community} />
+      </Route>
+      <Route path="/add-trade">
+        <ProtectedRoute component={AddTrade} />
+      </Route>
+      <Route path="/trade-history">
+        <ProtectedRoute component={TradeHistory} />
+      </Route>
+      <Route path="/ai-analysis">
+        <ProtectedRoute component={AIAnalysis} />
+      </Route>
+      <Route path="/strategies">
+        <ProtectedRoute component={Strategies} />
+      </Route>
+      <Route path="/profile">
+        <ProtectedRoute component={Profile} />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
@@ -40,12 +81,14 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="min-h-screen bg-charcoal text-white">
-          <Toaster />
-          <Router />
-        </div>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <div className="min-h-screen bg-charcoal text-white">
+            <Toaster />
+            <Router />
+          </div>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

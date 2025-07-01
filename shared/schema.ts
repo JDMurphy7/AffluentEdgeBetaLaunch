@@ -3,29 +3,17 @@ import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table for Replit Auth
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
-
-// User storage table for Replit Auth
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(), // Replit user ID (string)
-  email: varchar("email").unique(),
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
   accountBalance: decimal("account_balance", { precision: 15, scale: 2 }).notNull().default('100000.00'),
   customBalance: boolean("custom_balance").notNull().default(false),
   betaStatus: varchar("beta_status").notNull().default('pending'), // pending, approved, active, inactive
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  hubspotContactId: varchar("hubspot_contact_id"), // Link to HubSpot contact
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const strategies = pgTable("strategies", {
@@ -41,7 +29,7 @@ export const strategies = pgTable("strategies", {
 
 export const trades = pgTable("trades", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
+  userId: integer("user_id").notNull(),
   strategyId: integer("strategy_id"),
   symbol: text("symbol").notNull(), // EUR/USD, BTC/USD, GOLD, etc.
   assetClass: text("asset_class").notNull(), // forex, crypto, commodities, stocks, indices
@@ -65,7 +53,7 @@ export const trades = pgTable("trades", {
 
 export const portfolioSnapshots = pgTable("portfolio_snapshots", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
+  userId: integer("user_id").notNull(),
   balance: decimal("balance", { precision: 15, scale: 2 }).notNull(),
   equity: decimal("equity", { precision: 15, scale: 2 }).notNull(),
   drawdown: decimal("drawdown", { precision: 15, scale: 2 }).notNull().default('0'),

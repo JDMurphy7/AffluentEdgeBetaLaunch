@@ -18,10 +18,11 @@ import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User>;
   updateUserBalance(userId: number, balance: string): Promise<void>;
+  updateUserBetaStatus(userId: number, status: string): Promise<void>;
+  linkUserToHubSpot(userId: number, hubspotContactId: string): Promise<void>;
 
   // Strategy methods
   getStrategies(): Promise<Strategy[]>;
@@ -66,10 +67,7 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
+
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
@@ -87,7 +85,24 @@ export class DatabaseStorage implements IStorage {
   async updateUserBalance(userId: number, balance: string): Promise<void> {
     await db
       .update(users)
-      .set({ accountBalance: balance })
+      .set({ 
+        accountBalance: balance,
+        customBalance: true
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserBetaStatus(userId: number, status: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ betaStatus: status })
+      .where(eq(users.id, userId));
+  }
+
+  async linkUserToHubSpot(userId: number, hubspotContactId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ hubspotContactId })
       .where(eq(users.id, userId));
   }
 
