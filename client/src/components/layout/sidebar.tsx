@@ -41,10 +41,10 @@ export default function Sidebar({ userId }: SidebarProps) {
             <i className="fas fa-chart-line"></i>
             <span>Dashboard</span>
           </Link>
-          <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
+          <Link href="/add-trade" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/add-trade' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-plus-circle"></i>
             <span>Add Trade</span>
-          </button>
+          </Link>
           <Link href="/trade-history" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/trade-history' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-history"></i>
             <span>Trade History</span>
