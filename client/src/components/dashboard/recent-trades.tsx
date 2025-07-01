@@ -85,6 +85,52 @@ export default function RecentTrades({ userId }: RecentTradesProps) {
 
   const recentTrades = trades?.slice(0, 5) || [];
 
+  // Demo data for when no trades are available
+  const demoTrades = [
+    {
+      id: 'demo-1',
+      symbol: 'EURUSD',
+      assetClass: 'forex',
+      direction: 'long',
+      status: 'closed',
+      pnl: '1250',
+      aiGrade: 'A',
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-2', 
+      symbol: 'BTCUSD',
+      assetClass: 'crypto',
+      direction: 'short',
+      status: 'closed',
+      pnl: '-890',
+      aiGrade: 'B',
+      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-3',
+      symbol: 'GOLD',
+      assetClass: 'commodities', 
+      direction: 'long',
+      status: 'open',
+      pnl: '650',
+      aiGrade: 'A',
+      createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: 'demo-4',
+      symbol: 'AAPL',
+      assetClass: 'stocks',
+      direction: 'long',
+      status: 'closed',
+      pnl: '420',
+      aiGrade: 'B',
+      createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    }
+  ];
+
+  const tradesToShow = recentTrades.length > 0 ? recentTrades : demoTrades;
+
   return (
     <div className="glass-morphism p-6 rounded-xl">
       <div className="flex items-center justify-between mb-6">
@@ -92,42 +138,35 @@ export default function RecentTrades({ userId }: RecentTradesProps) {
         <button className="text-gold hover:text-bronze transition-colors text-sm">View All</button>
       </div>
       <div className="space-y-4">
-        {recentTrades.length > 0 ? (
-          recentTrades.map((trade) => {
-            const assetInfo = getAssetIcon(trade.assetClass, trade.symbol);
-            const pnl = parseFloat(trade.pnl || '0');
-            const isProfitable = pnl > 0;
-            
-            return (
-              <div key={trade.id} className="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
-                <div className={`w-10 h-10 ${assetInfo.color} rounded-lg flex items-center justify-center`}>
-                  <span className="font-bold text-sm">{assetInfo.icon}</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-white">{trade.symbol} {trade.direction === 'long' ? 'Long' : 'Short'}</h3>
-                  <p className="text-sm text-gray-400">
-                    {trade.status === 'closed' ? 'Closed' : 'Open'} • {formatTimeAgo(trade.createdAt)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className={`font-semibold ${isProfitable ? 'text-green-400' : 'text-red-400'}`}>
-                    {isProfitable ? '+' : ''}${Math.abs(pnl).toLocaleString()}
-                  </p>
-                  {trade.aiGrade && (
-                    <span className={`text-xs px-2 py-1 rounded ${getGradeStyle(trade.aiGrade)}`}>
-                      {trade.aiGrade}
-                    </span>
-                  )}
-                </div>
+        {tradesToShow.map((trade: any) => {
+          const assetInfo = getAssetIcon(trade.assetClass, trade.symbol);
+          const pnl = parseFloat(trade.pnl || '0');
+          const isProfitable = pnl > 0;
+          
+          return (
+            <div key={trade.id} className="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
+              <div className={`w-10 h-10 ${assetInfo.color} rounded-lg flex items-center justify-center`}>
+                <span className="font-bold text-sm">{assetInfo.icon}</span>
               </div>
-            );
-          })
-        ) : (
-          <div className="text-center py-8 text-gray-400">
-            <i className="fas fa-chart-line text-4xl mb-4 text-gold"></i>
-            <p>No trades yet. Start by adding your first trade!</p>
-          </div>
-        )}
+              <div className="flex-1">
+                <h3 className="font-medium text-white">{trade.symbol} {trade.direction === 'long' ? 'Long' : 'Short'}</h3>
+                <p className="text-sm text-gray-400">
+                  {trade.status === 'closed' ? 'Closed' : 'Open'} • {formatTimeAgo(trade.createdAt)}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className={`font-semibold ${isProfitable ? 'text-green-400' : 'text-red-400'}`}>
+                  {isProfitable ? '+' : ''}${Math.abs(pnl).toLocaleString()}
+                </p>
+                {trade.aiGrade && (
+                  <span className={`text-xs px-2 py-1 rounded ${getGradeStyle(trade.aiGrade)}`}>
+                    {trade.aiGrade}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
