@@ -226,7 +226,16 @@ export default function Community() {
             {/* Community Profile Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTraders.map((trader) => (
-                <div key={trader.id} className="glass-morphism p-6 rounded-xl border border-white/10 hover:border-gold/30 transition-all duration-300">
+                <div key={trader.id} className="glass-morphism p-6 rounded-xl border border-white/10 hover:border-gold/30 transition-all duration-300 relative">
+                  {/* AffluentEdge Brand Logo */}
+                  <div className="absolute top-4 right-4 opacity-20 hover:opacity-40 transition-opacity">
+                    <img
+                      src={affluentEdgeLogo}
+                      alt="AffluentEdge"
+                      className="w-8 h-8 object-contain"
+                    />
+                  </div>
+                  
                   {/* Profile Header */}
                   <div className="flex items-center space-x-4 mb-6">
                     <div className="relative">
@@ -296,7 +305,16 @@ export default function Community() {
 
           <TabsContent value="leaderboard" className="mt-6">
             {/* Top Performers Leaderboard */}
-            <div className="glass-morphism p-6 rounded-xl border border-white/10">
+            <div className="glass-morphism p-6 rounded-xl border border-white/10 relative">
+              {/* AffluentEdge Brand Logo */}
+              <div className="absolute top-4 right-4 opacity-20 hover:opacity-40 transition-opacity">
+                <img
+                  src={affluentEdgeLogo}
+                  alt="AffluentEdge"
+                  className="w-8 h-8 object-contain"
+                />
+              </div>
+              
               <h2 className="text-2xl font-bold text-white mb-6">Monthly Top Performers</h2>
               <div className="space-y-4">
                 {topPerformers.map((trader, index) => (
