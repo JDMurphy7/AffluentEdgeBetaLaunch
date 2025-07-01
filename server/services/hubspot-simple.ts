@@ -136,6 +136,51 @@ export class HubSpotService {
       console.error('Failed to update beta status:', error);
     }
   }
+
+  async getBetaApplicants(): Promise<Array<{
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    residency?: string;
+    betaStatus: 'pending' | 'approved' | 'active' | 'inactive';
+    signupDate: string;
+  }>> {
+    try {
+      const response = await hubspotClient.crm.contacts.searchApi.doSearch({
+        filterGroups: [{
+          filters: [{
+            propertyName: 'beta_status',
+            operator: 'HAS_PROPERTY' as any
+          }]
+        }],
+        properties: [
+          'email', 
+          'firstname', 
+          'lastname', 
+          'beta_status', 
+          'beta_signup_date', 
+          'country_of_residence',
+          'createdate'
+        ],
+        sorts: ['createdate'],
+        limit: 100
+      });
+
+      return response.results.map(contact => ({
+        id: contact.id,
+        email: contact.properties.email || '',
+        firstName: contact.properties.firstname || '',
+        lastName: contact.properties.lastname || '',
+        residency: contact.properties.country_of_residence || '',
+        betaStatus: (contact.properties.beta_status as any) || 'pending',
+        signupDate: contact.properties.beta_signup_date || contact.properties.createdate || new Date().toISOString()
+      }));
+    } catch (error) {
+      console.error('Failed to fetch beta applicants:', error);
+      return [];
+    }
+  }
 }
 
 export const hubspotService = new HubSpotService();

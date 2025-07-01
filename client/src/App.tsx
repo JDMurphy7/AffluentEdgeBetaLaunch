@@ -15,6 +15,7 @@ import Strategies from "@/pages/strategies";
 import Profile from "@/pages/profile";
 import AddTrade from "@/pages/add-trade";
 import AuthPage from "@/pages/auth-page";
+import AdminDashboard from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 import PremiumShowcase from "@/pages/premium-showcase";
 
@@ -70,6 +71,7 @@ function Router() {
       <Route path="/premium-showcase">
         <PremiumShowcase />
       </Route>
+      <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
