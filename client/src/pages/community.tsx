@@ -43,9 +43,9 @@ const mockTraders: TraderProfile[] = [
   },
   {
     id: "2",
-    username: "BetaTester_Demo",
-    displayName: "Sarah Johnson",
-    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
+    username: "ForexPro_Marcus",
+    displayName: "Marcus Thompson",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
     skillLevel: "Intermediate",
     winRate: 73.5,
     grade: "B+",
