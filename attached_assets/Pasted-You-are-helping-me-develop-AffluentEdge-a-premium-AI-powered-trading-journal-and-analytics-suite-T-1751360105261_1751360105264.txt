@@ -1,0 +1,147 @@
+You are helping me develop AffluentEdge, a premium AI-powered trading journal and analytics suite. This is the evolution of my previous trading platform work, now focused on creating a sophisticated, community-driven platform for retail and professional traders.
+
+Project Context & Evolution:
+
+Previously developed GradeAlpha and other trading platforms on Replit and GitHub
+
+AffluentEdge represents the premium iteration with advanced AI integration and community features
+
+Currently in beta development phase with plans for public launch
+
+Core Product Vision:
+AffluentEdge is a luxury trading journal that combines AI-powered trade analysis, custom strategy validation, and elite community features. Users can log trades through natural language ("Bought 100 TSLA @ $250, SL $245, TP $270") or advanced forms, receive instant AI grading and feedback, and showcase performance through premium glassmorphic profile cards.
+
+Technical Architecture:
+
+Frontend: HTML5, CSS3 (glassmorphic design), Vanilla JavaScript
+
+Development Platform: Replit for beta testing and rapid iteration
+
+Future Backend: Railway for scalable backend services
+
+AI Integration: OpenAI GPT-4 Vision API for trade analysis and strategy validation
+
+CRM: HubSpot integration for lead capture and user onboarding
+
+Code Management: GitHub for version control and collaboration
+
+Domain: affluentedge.app (Namecheap registration)
+
+Design System:
+
+Color Palette: Gold (#F9E086), Bronze (#E4BB76), Black (#0F0F0F), White (#FFFFFF)
+
+UI Style: Premium glassmorphic design with backdrop blur effects
+
+Typography: Inter font family for professional appearance
+
+Responsive: Mobile-first design with desktop optimization
+
+Core Features to Implement:
+
+Dual-Mode Trade Upload:
+
+Quick chat-style entry with AI parsing
+
+Advanced form with comprehensive strategy documentation
+
+Screenshot upload with GPT-4 Vision analysis
+
+Custom Strategy System:
+
+Manual strategy creation with detailed parameters
+
+PDF/document upload with AI extraction
+
+Strategy validation and backtesting simulation
+
+AI Analysis Engine:
+
+Trade grading (A-F scale) with detailed feedback
+
+Strategy adherence scoring
+
+Risk management evaluation
+
+Improvement suggestions
+
+Community Features:
+
+Elite profile score cards with glassmorphic design
+
+Global leaderboards and performance rankings
+
+Social sharing with mandatory brand attribution (@affluentedge, @theaffluentedge)
+
+Affiliate tracking for viral growth
+
+Analytics Dashboard:
+
+Equity curve visualization using Chart.js
+
+Performance metrics (win rate, profit factor, Sharpe ratio)
+
+Strategy breakdown analysis
+
+Exportable reports
+
+User Management:
+
+Multi-provider authentication (Google, Apple, email)
+
+Profile customization with trading specializations
+
+Privacy controls for data sharing
+
+Integration Requirements:
+
+HubSpot CRM: Automated lead capture from beta signups
+
+Social Media: Mandatory tagging system for X, Facebook, Instagram
+
+Netlify Forms: For seamless form submission and CRM integration
+
+Google Analytics: User behavior tracking and conversion analysis
+
+File Structure for Replit:
+
+text
+affluentedge-beta/
+├── index.html (main application)
+├── style.css (glassmorphic design system)
+├── app.js (core functionality)
+├── package.json (project configuration)
+└── README.md (documentation)
+Beta Testing Goals:
+
+Validate user experience with dual-mode trade upload
+
+Test AI analysis accuracy and feedback quality
+
+Gather community engagement metrics
+
+Optimize conversion funnel from signup to active usage
+
+Success Metrics:
+
+User activation rate (profile creation + first trade logged)
+
+AI analysis satisfaction scores
+
+Community engagement (profile views, social shares)
+
+Beta-to-paid conversion rates
+
+Development Priorities:
+
+Core trade logging functionality with AI analysis
+
+User authentication and profile creation
+
+Community features and social sharing
+
+Analytics dashboard and performance tracking
+
+HubSpot integration and lead nurturing
+
+Please help me build this application with clean, maintainable code that's optimized for Replit deployment, with consideration for future Railway backend integration. Focus on creating a premium user experience that justifies the luxury positioning while ensuring all features work seamlessly together.
