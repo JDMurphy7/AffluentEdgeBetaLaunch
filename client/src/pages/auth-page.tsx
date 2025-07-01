@@ -48,6 +48,15 @@ export default function AuthPage() {
       return;
     }
 
+    if (!validateEmail(loginData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch("/api/login", {
@@ -79,6 +88,11 @@ export default function AuthPage() {
     }
   };
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
   const handleBetaApplication = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -91,9 +105,18 @@ export default function AuthPage() {
       return;
     }
 
+    if (!validateEmail(betaApplicationData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch("/api/beta-signup", {
+      const response = await fetch("/api/beta-access", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

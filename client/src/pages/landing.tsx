@@ -22,12 +22,26 @@ export default function Landing() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
   const handleBetaRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.firstName || !formData.lastName || !formData.residency) {
       toast({
         title: "Required Fields Missing",
         description: "Please fill in all required fields including your country.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
