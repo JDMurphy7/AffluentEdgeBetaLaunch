@@ -226,7 +226,7 @@ export default function Community() {
             {/* Community Profile Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredTraders.map((trader) => (
-                <div key={trader.id} className="relative backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-gold/30 transition-all duration-300 shadow-2xl">
+                <div key={trader.id} className="relative backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-2xl p-8 hover:bg-gradient-to-br hover:from-white/15 hover:to-white/8 hover:border-gold/40 transition-all duration-500 shadow-2xl group">
                   {/* AffluentEdge Brand Logo */}
                   <div className="absolute top-4 right-4 opacity-20 hover:opacity-40 transition-opacity">
                     <img
@@ -237,64 +237,66 @@ export default function Community() {
                   </div>
                   
                   {/* Profile Header */}
-                  <div className="flex items-center space-x-4 mb-6">
+                  <div className="flex items-center space-x-5 mb-8">
                     <div className="relative">
-                      <img
-                        src={trader.avatar}
-                        alt={trader.displayName}
-                        className="w-16 h-16 rounded-full object-cover"
-                      />
+                      <div className="w-20 h-20 bg-gradient-to-br from-gold/20 to-bronze/20 rounded-full p-1 group-hover:from-gold/30 group-hover:to-bronze/30 transition-all duration-300">
+                        <img
+                          src={trader.avatar}
+                          alt={trader.displayName}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      </div>
                       {trader.isVerified && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-gold rounded-full flex items-center justify-center">
-                          <i className="fas fa-check text-charcoal text-xs"></i>
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-gold to-bronze rounded-full flex items-center justify-center shadow-lg">
+                          <i className="fas fa-crown text-black text-sm"></i>
                         </div>
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-white font-semibold text-lg">{trader.displayName}</h3>
-                      <p className="text-white/70 text-sm">@{trader.username}</p>
-                      <Badge className={`text-xs mt-1 ${getSkillLevelColor(trader.skillLevel)}`}>
+                      <h3 className="text-white font-bold text-xl mb-1">{trader.displayName}</h3>
+                      <p className="text-white/60 text-sm mb-2">@{trader.username}</p>
+                      <Badge className={`text-sm font-semibold px-3 py-1 ${getSkillLevelColor(trader.skillLevel)}`}>
                         {trader.skillLevel}
                       </Badge>
                     </div>
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-white">{trader.winRate.toFixed(1)}%</div>
-                      <div className="text-white/60 text-sm">Win Rate</div>
+                  <div className="grid grid-cols-2 gap-6 mb-6">
+                    <div className="text-center backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10 group-hover:bg-white/8 transition-all duration-300">
+                      <div className="text-3xl font-bold text-white mb-1">{trader.winRate.toFixed(1)}%</div>
+                      <div className="text-white/70 text-sm font-medium">Win Rate</div>
                     </div>
-                    <div className="text-center">
-                      <div className={`text-2xl font-bold ${getGradeColor(trader.grade)}`}>{trader.grade}</div>
-                      <div className="text-white/60 text-sm">Grade</div>
+                    <div className="text-center backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10 group-hover:bg-white/8 transition-all duration-300">
+                      <div className={`text-3xl font-bold mb-1 ${getGradeColor(trader.grade)}`}>{trader.grade}</div>
+                      <div className="text-white/70 text-sm font-medium">Grade</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-white">{trader.profitFactor}</div>
-                      <div className="text-white/60 text-sm">Profit Factor</div>
+                    <div className="text-center backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10 group-hover:bg-white/8 transition-all duration-300">
+                      <div className="text-2xl font-bold text-white mb-1">{trader.profitFactor}</div>
+                      <div className="text-white/70 text-sm font-medium">Profit Factor</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-white">{trader.totalTrades}</div>
-                      <div className="text-white/60 text-sm">Total Trades</div>
+                    <div className="text-center backdrop-blur-sm bg-white/5 rounded-xl p-4 border border-white/10 group-hover:bg-white/8 transition-all duration-300">
+                      <div className="text-2xl font-bold text-white mb-1">{trader.totalTrades}</div>
+                      <div className="text-white/70 text-sm font-medium">Total Trades</div>
                     </div>
                   </div>
 
                   {/* Account Growth */}
-                  <div className="backdrop-blur-sm bg-white/5 border border-white/10 p-4 rounded-lg mb-4">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-white/70 text-sm">Account Growth</span>
-                      <span className={`text-sm font-medium ${trader.monthlyGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className="backdrop-blur-md bg-gradient-to-r from-white/10 to-white/5 border border-white/20 p-5 rounded-2xl mb-6 group-hover:from-white/15 group-hover:to-white/8 transition-all duration-300 shadow-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-white/80 text-sm font-medium">Account Growth</span>
+                      <span className={`text-sm font-semibold px-3 py-1 rounded-full ${trader.monthlyGrowth > 0 ? 'text-green-400 bg-green-400/10 border border-green-400/20' : 'text-red-400 bg-red-400/10 border border-red-400/20'}`}>
                         Monthly: {trader.monthlyGrowth > 0 ? '+' : ''}{trader.monthlyGrowth}%
                       </span>
                     </div>
-                    <div className="text-2xl font-bold text-white">+{trader.accountGrowth}%</div>
-                    <div className="text-white/50 text-xs mt-1">Total Growth</div>
+                    <div className="text-3xl font-bold bg-gradient-to-r from-gold to-bronze bg-clip-text text-transparent mb-1">+{trader.accountGrowth}%</div>
+                    <div className="text-white/60 text-sm">Total Growth</div>
                   </div>
 
                   {/* Strategies */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-3">
                     {trader.strategies.slice(0, 3).map((strategy, index) => (
-                      <Badge key={index} variant="outline" className="text-xs border-white/20 text-white/80">
+                      <Badge key={index} className="backdrop-blur-sm bg-white/10 border border-white/20 text-white/90 px-3 py-1 text-sm font-medium hover:bg-white/15 transition-all duration-200">
                         {strategy}
                       </Badge>
                     ))}
