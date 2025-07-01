@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { PortfolioMetrics } from "@/lib/types";
 
 interface PerformanceCardsProps {
   userId: number;
 }
 
 export default function PerformanceCards({ userId }: PerformanceCardsProps) {
-  const { data: metrics, isLoading } = useQuery({
+  const { data: metrics, isLoading } = useQuery<PortfolioMetrics>({
     queryKey: [`/api/portfolio/${userId}/metrics`],
   });
 
@@ -36,9 +37,12 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
           <div className="w-12 h-12 bg-gold/20 rounded-lg flex items-center justify-center">
             <i className="fas fa-chart-line text-gold text-xl"></i>
           </div>
-          <span className="text-sm text-gold">
-            {metrics?.winRate ? formatPercentage(metrics.winRate - 70) : '+8.2%'}
-          </span>
+          <div className="text-right">
+            <span className="text-sm text-gold block">
+              {metrics?.winRate ? formatPercentage(metrics.winRate - 70) : '+8.2%'}
+            </span>
+            <span className="text-xs text-muted-foreground">vs last month</span>
+          </div>
         </div>
         <h3 className="text-2xl font-bold text-white">
           {metrics?.winRate ? formatPercentage(metrics.winRate) : '87.3%'}
@@ -51,9 +55,12 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
           <div className="w-12 h-12 bg-bronze/20 rounded-lg flex items-center justify-center">
             <i className="fas fa-dollar-sign text-bronze text-xl"></i>
           </div>
-          <span className="text-sm text-bronze">
-            {metrics?.profitFactor ? `+${formatPercentage((metrics.profitFactor - 1) * 50)}` : '+15.4%'}
-          </span>
+          <div className="text-right">
+            <span className="text-sm text-bronze block">
+              {metrics?.profitFactor ? `+${formatPercentage((metrics.profitFactor - 1) * 50)}` : '+15.4%'}
+            </span>
+            <span className="text-xs text-muted-foreground">vs last month</span>
+          </div>
         </div>
         <h3 className="text-2xl font-bold text-white">
           {metrics?.profitFactor ? formatNumber(metrics.profitFactor, 1) : '2.4'}
@@ -66,9 +73,12 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
           <div className="w-12 h-12 bg-gold/15 rounded-lg flex items-center justify-center">
             <i className="fas fa-trending-up text-gold text-xl"></i>
           </div>
-          <span className="text-sm text-gold">
-            {metrics?.sharpeRatio ? `+${formatPercentage(metrics.sharpeRatio * 10)}` : '+2.1%'}
-          </span>
+          <div className="text-right">
+            <span className="text-sm text-gold block">
+              {metrics?.sharpeRatio ? `+${formatPercentage(metrics.sharpeRatio * 10)}` : '+2.1%'}
+            </span>
+            <span className="text-xs text-muted-foreground">vs last month</span>
+          </div>
         </div>
         <h3 className="text-2xl font-bold text-white">
           {metrics?.sharpeRatio ? formatNumber(metrics.sharpeRatio, 2) : '1.67'}
@@ -81,9 +91,12 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
           <div className="w-12 h-12 bg-destructive/20 rounded-lg flex items-center justify-center">
             <i className="fas fa-chart-area text-destructive text-xl"></i>
           </div>
-          <span className="text-sm text-destructive">
-            {metrics?.maxDrawdown ? formatPercentage(metrics.maxDrawdown - 10) : '-2.3%'}
-          </span>
+          <div className="text-right">
+            <span className="text-sm text-destructive block">
+              {metrics?.maxDrawdown ? formatPercentage(metrics.maxDrawdown - 10) : '-2.3%'}
+            </span>
+            <span className="text-xs text-muted-foreground">vs last month</span>
+          </div>
         </div>
         <h3 className="text-2xl font-bold text-white">
           {metrics?.maxDrawdown ? formatPercentage(metrics.maxDrawdown) : '8.5%'}
