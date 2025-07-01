@@ -25,16 +25,12 @@ export default function AdminDashboard() {
   const { data: applicants, isLoading, error } = useQuery<BetaApplicant[]>({
     queryKey: ['/api/admin/beta-applicants'],
     queryFn: async () => {
-      // For demo purposes, using a simple admin check
-      // In production, implement proper admin authentication
-      const adminEmail = prompt("Enter admin email for access:");
-      if (!adminEmail) {
-        throw new Error("Admin email required");
-      }
+      // Use the configured admin email
+      const adminEmail = "theaffluentedge@gmail.com";
       
       const response = await fetch(`/api/admin/beta-applicants?admin=${encodeURIComponent(adminEmail)}`);
       if (!response.ok) {
-        throw new Error("Access denied");
+        throw new Error("Access denied - admin privileges required");
       }
       
       return response.json();
