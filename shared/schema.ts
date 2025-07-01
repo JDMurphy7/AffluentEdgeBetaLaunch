@@ -110,6 +110,8 @@ export const insertTradeSchema = createInsertSchema(trades).omit({
   riskManagementScore: true,
 }).extend({
   naturalLanguageInput: z.string().optional(),
+  entryTime: z.union([z.date(), z.string().transform(str => new Date(str))]),
+  exitTime: z.union([z.date(), z.string().transform(str => new Date(str))]).optional(),
 });
 
 export const insertPortfolioSnapshotSchema = createInsertSchema(portfolioSnapshots).omit({

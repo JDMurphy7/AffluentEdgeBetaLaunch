@@ -151,22 +151,30 @@ export default function AddTrade() {
 
       // Parse natural language if provided
       if (naturalInput.trim()) {
-        const response = await fetch("/api/trades/parse-natural", {
+        const imageBase64Array = await Promise.all(
+          uploadedImages.map(file => convertToBase64(file))
+        );
+
+        const response = await fetch("/api/trades/analyze", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ 
-            input: naturalInput,
-            hasImages: uploadedImages.length > 0,
-            imageAnalysis: analysisData 
+            naturalLanguage: naturalInput,
+            images: imageBase64Array.length > 0 ? imageBase64Array : undefined
           }),
         });
 
-        if (!response.ok) throw new Error("Failed to parse");
+        if (!response.ok) throw new Error("Failed to analyze");
 
-        const parsed = await response.json();
-        analysisData = { ...analysisData, ...parsed };
+        const result = await response.json();
+        if (result.parsedTrade) {
+          analysisData = { ...analysisData, ...result.parsedTrade };
+        }
+        if (result.imageAnalysis) {
+          analysisData.aiNotes = result.imageAnalysis;
+        }
       }
 
       setParsedData(analysisData);

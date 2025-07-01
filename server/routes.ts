@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { insertTradeSchema, insertUserSchema } from "@shared/schema";
 import { analyzeTradeWithAI, parseNaturalLanguageInput } from "./services/openai";
+import { simpleHubspotService } from "./services/hubspot-simple";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // User routes
@@ -76,7 +77,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/trades", async (req, res) => {
     try {
-      const tradeData = insertTradeSchema.parse(req.body);
+      const userId = req.session.userId || 1;
+      
+      // Handle date conversion manually
+      const requestData = { ...req.body, userId };
+      if (requestData.entryTime && typeof requestData.entryTime === 'string') {
+        requestData.entryTime = new Date(requestData.entryTime);
+      }
+      if (requestData.exitTime && typeof requestData.exitTime === 'string') {
+        requestData.exitTime = new Date(requestData.exitTime);
+      }
+      
+      // Manual validation for required fields
+      if (!requestData.symbol || !requestData.assetClass || !requestData.direction || 
+          !requestData.entryPrice || !requestData.quantity || !requestData.entryTime) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const tradeData = requestData;
       
       let processedTrade = tradeData;
       
@@ -179,40 +197,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Beta access route
+  // POST /api/trades/analyze - Analyze trade with AI (for natural language/image input)
+  app.post("/api/trades/analyze", async (req, res) => {
+    try {
+      const { naturalLanguage, images } = req.body;
+      
+      if (!naturalLanguage && (!images || images.length === 0)) {
+        return res.status(400).json({ error: "Natural language input or images required" });
+      }
+
+      let parsedTrade = {};
+      let imageAnalysis = {};
+
+      // Parse natural language input if provided
+      if (naturalLanguage) {
+        parsedTrade = await parseNaturalLanguageInput(naturalLanguage);
+      }
+
+      // For now, return success with parsed data
+      // Image analysis would require additional setup
+      if (images && images.length > 0) {
+        imageAnalysis = { 
+          imageAnalysis: `Received ${images.length} images for analysis. Image analysis feature coming soon.`
+        };
+      }
+
+      res.json({
+        parsedTrade,
+        ...imageAnalysis,
+        success: true
+      });
+    } catch (error) {
+      console.error("Error analyzing trade:", error);
+      res.status(500).json({ error: "Failed to analyze trade" });
+    }
+  });
+
+  // Beta access route with HubSpot integration
   app.post("/api/beta-access", async (req, res) => {
     try {
       const betaRequestSchema = z.object({
         email: z.string().email("Invalid email address"),
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        company: z.string().optional(),
+        tradingExperience: z.string().optional(),
+        assetClasses: z.array(z.string()).optional(),
+        source: z.string().optional()
       });
 
-      const { email } = betaRequestSchema.parse(req.body);
+      const userData = betaRequestSchema.parse(req.body);
       
-      // Log beta request (in production, this would be stored in database)
-      console.log(`Beta access request from: ${email}`);
+      // Check if contact already exists
+      const emailExists = await simpleHubspotService.checkSimpleEmailExists(userData.email);
+      if (emailExists) {
+        return res.status(409).json({ 
+          error: "Email already registered for beta access",
+          message: "This email is already in our beta program."
+        });
+      }
+
+      // Create contact in HubSpot
+      const contact = await simpleHubspotService.createSimpleContact(
+        userData.email, 
+        userData.firstName, 
+        userData.lastName
+      );
       
-      // In production, you would:
-      // 1. Store in database
-      // 2. Send confirmation email
-      // 3. Add to mailing list
-      // 4. Notify team
+      console.log(`Beta access request registered: ${userData.email}`);
       
       res.json({ 
         success: true, 
-        message: "Beta access request submitted successfully" 
+        message: "Beta access request received! We'll review your application and be in touch soon.",
+        contactId: contact.id
       });
     } catch (error) {
       console.error("Beta access error:", error);
-      
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          error: "Invalid email address provided" 
-        });
+      if (error.message && error.message.includes('CRM')) {
+        res.status(500).json({ error: "Registration system temporarily unavailable" });
+      } else if (error instanceof z.ZodError) {
+        res.status(400).json({ error: "Invalid email address provided" });
+      } else {
+        res.status(500).json({ error: "Failed to submit beta access request" });
       }
-      
-      res.status(500).json({ 
-        error: "Failed to submit beta access request" 
-      });
     }
   });
 
