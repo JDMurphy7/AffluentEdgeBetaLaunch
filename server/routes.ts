@@ -5,6 +5,7 @@ import { z } from "zod";
 import { insertTradeSchema } from "@shared/schema";
 import { analyzeTradeWithAI, parseNaturalLanguageInput } from "./services/openai";
 import { hubspotService } from "./services/hubspot-simple";
+import { emailService } from "./services/email";
 import { setupAuth, requireAuth, requireActiveBeta } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -35,7 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/approve-user", async (req, res) => {
     try {
-      const { contactId, email } = req.body;
+      const { contactId, email, firstName, lastName } = req.body;
       
       if (!contactId || !email) {
         return res.status(400).json({ error: "Contact ID and email required" });
@@ -44,7 +45,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update status in HubSpot
       await hubspotService.updateBetaStatus(contactId, 'approved');
       
-      res.json({ success: true, message: "User approved successfully" });
+      // Send welcome email to approved user
+      const loginUrl = emailService.generateLoginUrl(email);
+      const emailSent = await emailService.sendWelcomeEmail({
+        firstName: firstName || 'Trader',
+        email,
+        loginUrl,
+      });
+
+      if (emailSent) {
+        console.log(`Welcome email sent to approved user: ${email}`);
+      } else {
+        console.error(`Failed to send welcome email to: ${email}`);
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "User approved successfully and welcome email sent",
+        emailSent 
+      });
     } catch (error) {
       console.error("Failed to approve user:", error);
       res.status(500).json({ error: "Failed to approve user" });

@@ -41,13 +41,18 @@ export default function AdminDashboard() {
   });
 
   const approveMutation = useMutation({
-    mutationFn: async ({ contactId, email }: { contactId: string; email: string }) => {
+    mutationFn: async ({ contactId, email, firstName, lastName }: { 
+      contactId: string; 
+      email: string; 
+      firstName?: string; 
+      lastName?: string; 
+    }) => {
       const response = await fetch('/api/admin/approve-user', {
         method: "POST",
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ contactId, email }),
+        body: JSON.stringify({ contactId, email, firstName, lastName }),
       });
       
       if (!response.ok) {
@@ -104,8 +109,8 @@ export default function AdminDashboard() {
     },
   });
 
-  const handleApprove = (contactId: string, email: string) => {
-    approveMutation.mutate({ contactId, email });
+  const handleApprove = (contactId: string, email: string, firstName?: string, lastName?: string) => {
+    approveMutation.mutate({ contactId, email, firstName, lastName });
   };
 
   const handleReject = (contactId: string, email: string) => {
@@ -285,7 +290,7 @@ export default function AdminDashboard() {
                     {applicant.betaStatus === 'pending' && (
                       <div className="flex space-x-3">
                         <Button
-                          onClick={() => handleApprove(applicant.id, applicant.email)}
+                          onClick={() => handleApprove(applicant.id, applicant.email, applicant.firstName, applicant.lastName)}
                           disabled={approveMutation.isPending}
                           className="bg-green-600 hover:bg-green-700 text-white"
                         >
