@@ -245,7 +245,7 @@ export default function Community() {
                       <img 
                         src={affluentEdgeLogo} 
                         alt="AffluentEdge" 
-                        className="w-8 h-8 opacity-90 filter brightness-0 invert"
+                        className="w-10 h-10 opacity-80"
                       />
                     </div>
                     
@@ -264,10 +264,10 @@ export default function Community() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-charcoal font-bold text-lg">{trader.displayName}</h3>
-                        <p className="text-charcoal/70 text-sm font-medium">@{trader.username}</p>
+                        <h3 className="text-charcoal font-bold text-lg drop-shadow-sm">{trader.displayName}</h3>
+                        <p className="text-charcoal/80 text-sm font-medium">@{trader.username}</p>
                         <div className="mt-2">
-                          <span className="bg-charcoal/20 text-charcoal px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm">
+                          <span className="bg-white/20 text-charcoal px-2 py-1 rounded-full text-xs font-bold backdrop-blur-sm border border-charcoal/20">
                             {trader.skillLevel.toUpperCase()}
                           </span>
                         </div>
@@ -276,8 +276,8 @@ export default function Community() {
                     
                     {/* Featured Grade */}
                     <div className="text-center">
-                      <div className="text-4xl font-black text-charcoal mb-1">{trader.grade}</div>
-                      <div className="text-charcoal/80 text-sm font-bold">AFFLUENT GRADE</div>
+                      <div className="text-5xl font-black text-charcoal mb-1 drop-shadow-lg">{trader.grade}</div>
+                      <div className="text-charcoal/90 text-sm font-bold tracking-wider">AFFLUENT GRADE</div>
                     </div>
                   </div>
                   
