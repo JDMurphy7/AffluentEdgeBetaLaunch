@@ -19,8 +19,8 @@ export class HubSpotService {
     try {
       // Create residency custom property
       await hubspotClient.crm.properties.coreApi.create('contacts', {
-        name: 'residency',
-        label: 'Residency/Country',
+        name: 'country_of_residence',
+        label: 'Country of Residence',
         type: 'string' as any,
         fieldType: 'text' as any,
         groupName: 'contactinformation',
@@ -69,26 +69,32 @@ export class HubSpotService {
     await this.ensureCustomProperties();
 
     try {
-      const response = await hubspotClient.crm.contacts.basicApi.create({
+      const contactData = {
         properties: {
           email: email,
           firstname: firstName || '',
           lastname: lastName || '',
-          residency: residency || '',
+          country: residency || '',
+          country_of_residence: residency || '',
           beta_signup_date: new Date().toISOString(),
           beta_status: 'pending'
         },
         associations: []
-      });
+      };
+
+      console.log(`Creating HubSpot contact with data:`, JSON.stringify(contactData.properties, null, 2));
+
+      const response = await hubspotClient.crm.contacts.basicApi.create(contactData);
 
       console.log(`Beta contact created: ${email} from ${residency || 'Unknown'}`);
+      console.log(`HubSpot response properties:`, JSON.stringify(response.properties, null, 2));
 
       return {
         id: response.id,
         email: response.properties.email || email,
         firstName: response.properties.firstname || firstName,
         lastName: response.properties.lastname || lastName,
-        residency: response.properties.residency || residency
+        residency: response.properties.country_of_residence || residency
       };
     } catch (error) {
       console.error('HubSpot contact creation failed:', error);
