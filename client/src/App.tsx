@@ -16,6 +16,7 @@ import Profile from "@/pages/profile";
 import AddTrade from "@/pages/add-trade";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
+import PremiumShowcase from "@/pages/premium-showcase";
 
 function ProtectedRoute({ component: Component, allowDemo = false }: { component: () => JSX.Element, allowDemo?: boolean }) {
   const { user, isLoading } = useAuth();
@@ -65,6 +66,9 @@ function Router() {
       </Route>
       <Route path="/profile">
         <ProtectedRoute component={Profile} />
+      </Route>
+      <Route path="/premium-showcase">
+        <PremiumShowcase />
       </Route>
       <Route component={NotFound} />
     </Switch>
