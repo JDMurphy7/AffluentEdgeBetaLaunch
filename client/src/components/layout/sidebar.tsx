@@ -71,6 +71,11 @@ export default function Sidebar({ userId }: SidebarProps) {
             <i className="fas fa-users"></i>
             <span>Community</span>
           </Link>
+          <Link href="/premium-showcase" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-gold/20 transition-colors ${location === '/premium-showcase' ? 'text-gold bg-gold/10' : 'text-gold'} border border-gold/30`}>
+            <i className="fas fa-crown"></i>
+            <span>Premium Experience</span>
+            <span className="text-xs bg-gold/20 text-gold px-2 py-0.5 rounded-full ml-auto">NEW</span>
+          </Link>
           <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-trophy"></i>
             <span>Leaderboard</span>
