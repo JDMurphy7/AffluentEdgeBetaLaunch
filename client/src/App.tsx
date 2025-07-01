@@ -49,7 +49,7 @@ function Router() {
         <ProtectedRoute component={Dashboard} allowDemo={true} />
       </Route>
       <Route path="/community">
-        <ProtectedRoute component={Community} />
+        <ProtectedRoute component={Community} allowDemo={true} />
       </Route>
       <Route path="/add-trade">
         <ProtectedRoute component={AddTrade} />
@@ -61,7 +61,7 @@ function Router() {
         <ProtectedRoute component={AIAnalysis} />
       </Route>
       <Route path="/strategies">
-        <ProtectedRoute component={Strategies} />
+        <ProtectedRoute component={Strategies} allowDemo={true} />
       </Route>
       <Route path="/profile">
         <ProtectedRoute component={Profile} />
