@@ -225,72 +225,109 @@ export default function Community() {
           <TabsContent value="profiles" className="mt-6">
             {/* Community Profile Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTraders.map((trader) => (
-                <div key={trader.id} className="glass-morphism p-6 rounded-xl border border-white/10 hover:border-gold/30 transition-all duration-300">
-                  {/* Profile Header */}
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="relative">
-                      <img
-                        src={trader.avatar}
-                        alt={trader.displayName}
-                        className="w-16 h-16 rounded-full object-cover"
+              {filteredTraders.map((trader, index) => {
+                // Create dynamic gradient backgrounds inspired by FTMO
+                const gradients = [
+                  'bg-gradient-to-br from-gold via-bronze to-gold/80', // Gold gradient
+                  'bg-gradient-to-br from-bronze via-gold to-bronze/80', // Bronze gradient  
+                  'bg-gradient-to-br from-gold/90 via-bronze/90 to-charcoal', // Dark gold
+                  'bg-gradient-to-br from-bronze/80 via-gold/60 to-bronze/60', // Soft bronze
+                  'bg-gradient-to-br from-gold/70 via-bronze/70 to-gold/50', // Subtle gold
+                ];
+                const gradientClass = gradients[index % gradients.length];
+                
+                return (
+                <div key={trader.id} className="relative overflow-hidden rounded-xl border border-white/20 hover:border-gold/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl">
+                  {/* Gradient Header Section */}
+                  <div className={`${gradientClass} p-6 relative`}>
+                    {/* AffluentEdge Logo */}
+                    <div className="absolute top-4 right-4">
+                      <img 
+                        src={affluentEdgeLogo} 
+                        alt="AffluentEdge" 
+                        className="w-8 h-8 opacity-90 filter brightness-0 invert"
                       />
-                      {trader.isVerified && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-gold rounded-full flex items-center justify-center">
-                          <i className="fas fa-check text-charcoal text-xs"></i>
+                    </div>
+                    
+                    {/* Profile Header */}
+                    <div className="flex items-center space-x-4 mb-4">
+                      <div className="relative">
+                        <img
+                          src={trader.avatar}
+                          alt={trader.displayName}
+                          className="w-16 h-16 rounded-full object-cover border-2 border-charcoal/20"
+                        />
+                        {trader.isVerified && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-charcoal rounded-full flex items-center justify-center border border-white/20">
+                            <i className="fas fa-check text-gold text-xs"></i>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-charcoal font-bold text-lg">{trader.displayName}</h3>
+                        <p className="text-charcoal/70 text-sm font-medium">@{trader.username}</p>
+                        <div className="mt-2">
+                          <span className="bg-charcoal/20 text-charcoal px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm">
+                            {trader.skillLevel.toUpperCase()}
+                          </span>
                         </div>
-                      )}
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-white font-semibold text-lg">{trader.displayName}</h3>
-                      <p className="text-white/70 text-sm">@{trader.username}</p>
-                      <Badge className={`text-xs mt-1 ${getSkillLevelColor(trader.skillLevel)}`}>
-                        {trader.skillLevel}
-                      </Badge>
+                    
+                    {/* Featured Grade */}
+                    <div className="text-center">
+                      <div className="text-4xl font-black text-charcoal mb-1">{trader.grade}</div>
+                      <div className="text-charcoal/80 text-sm font-bold">AFFLUENT GRADE</div>
                     </div>
                   </div>
+                  
+                  {/* Stats Section */}
+                  <div className="bg-charcoal/95 backdrop-blur-sm p-6">
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="text-center p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className="text-2xl font-bold text-gold">{trader.winRate.toFixed(1)}%</div>
+                        <div className="text-white/60 text-sm">Win Rate</div>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className="text-2xl font-bold text-white">{trader.profitFactor}</div>
+                        <div className="text-white/60 text-sm">Profit Factor</div>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className="text-xl font-bold text-white">{trader.totalTrades}</div>
+                        <div className="text-white/60 text-sm">Total Trades</div>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className={`text-xl font-bold ${trader.monthlyGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {trader.monthlyGrowth > 0 ? '+' : ''}{trader.monthlyGrowth}%
+                        </div>
+                        <div className="text-white/60 text-sm">Monthly Growth</div>
+                      </div>
+                    </div>
 
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-white">{trader.winRate.toFixed(1)}%</div>
-                      <div className="text-white/60 text-sm">Win Rate</div>
+                    {/* Account Growth Highlight */}
+                    <div className="bg-gradient-to-r from-gold/20 to-bronze/20 p-4 rounded-lg mb-4 border border-gold/30">
+                      <div className="flex justify-between items-center">
+                        <span className="text-white font-medium">Total Account Growth</span>
+                        <span className="text-2xl font-bold text-gold">+{trader.accountGrowth}%</span>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className={`text-2xl font-bold ${getGradeColor(trader.grade)}`}>{trader.grade}</div>
-                      <div className="text-white/60 text-sm">Grade</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-white">{trader.profitFactor}</div>
-                      <div className="text-white/60 text-sm">Profit Factor</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-white">{trader.totalTrades}</div>
-                      <div className="text-white/60 text-sm">Total Trades</div>
-                    </div>
-                  </div>
 
-                  {/* Account Growth */}
-                  <div className="glass-morphism p-3 rounded-lg mb-4 border border-white/5">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/70 text-sm">Account Growth</span>
-                      <span className={`text-sm font-medium ${trader.monthlyGrowth > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                        {trader.monthlyGrowth > 0 ? '+' : ''}{trader.monthlyGrowth}%
-                      </span>
+                    {/* Strategies */}
+                    <div className="space-y-2">
+                      <div className="text-white/80 text-sm font-medium">Trading Strategies:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {trader.strategies.slice(0, 3).map((strategy, index) => (
+                          <Badge key={index} className="bg-gold/20 text-gold border-gold/30 text-xs">
+                            {strategy}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                    <div className="text-2xl font-bold text-white">+{trader.accountGrowth}%</div>
-                  </div>
-
-                  {/* Strategies */}
-                  <div className="flex flex-wrap gap-2">
-                    {trader.strategies.slice(0, 3).map((strategy, index) => (
-                      <Badge key={index} variant="outline" className="text-xs border-white/20 text-white/80">
-                        {strategy}
-                      </Badge>
-                    ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </TabsContent>
 
