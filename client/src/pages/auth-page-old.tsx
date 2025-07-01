@@ -63,8 +63,8 @@ export default function AuthPage() {
       }
 
       toast({
-        title: "Welcome Back!",
-        description: `Hello ${data.user.firstName || 'User'}!`,
+        title: "Login Successful",
+        description: `Welcome back, ${data.user.firstName || data.user.email}!`,
       });
 
       setLocation("/dashboard");
@@ -194,7 +194,7 @@ export default function AuthPage() {
                     disabled={isLoading}
                     required
                   />
-                  <Button 
+                  <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90"
                     disabled={isLoading}
@@ -207,19 +207,19 @@ export default function AuthPage() {
 
             <TabsContent value="register">
               <CardHeader className="text-center">
-                <CardTitle className="text-white">Apply for Beta</CardTitle>
+                <CardTitle className="text-white">Create Account</CardTitle>
                 <CardDescription className="text-white/70">
-                  Request access to AffluentEdge beta program
+                  Join as an approved beta user
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleBetaApplication} className="space-y-4">
+                <form onSubmit={handleRegister} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <Input
                       type="text"
                       placeholder="First Name"
-                      value={betaApplicationData.firstName}
-                      onChange={(e) => setBetaApplicationData(prev => ({ ...prev, firstName: e.target.value }))}
+                      value={registerData.firstName}
+                      onChange={(e) => setRegisterData(prev => ({ ...prev, firstName: e.target.value }))}
                       className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
                       disabled={isLoading}
                       required
@@ -227,8 +227,8 @@ export default function AuthPage() {
                     <Input
                       type="text"
                       placeholder="Last Name"
-                      value={betaApplicationData.lastName}
-                      onChange={(e) => setBetaApplicationData(prev => ({ ...prev, lastName: e.target.value }))}
+                      value={registerData.lastName}
+                      onChange={(e) => setRegisterData(prev => ({ ...prev, lastName: e.target.value }))}
                       className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
                       disabled={isLoading}
                       required
@@ -237,39 +237,59 @@ export default function AuthPage() {
                   <Input
                     type="email"
                     placeholder="Email address"
-                    value={betaApplicationData.email}
-                    onChange={(e) => setBetaApplicationData(prev => ({ ...prev, email: e.target.value }))}
+                    value={registerData.email}
+                    onChange={(e) => setRegisterData(prev => ({ ...prev, email: e.target.value }))}
                     className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
                     disabled={isLoading}
                     required
                   />
                   <Input
-                    type="text"
-                    placeholder="Country/Region of residency"
-                    value={betaApplicationData.residency}
-                    onChange={(e) => setBetaApplicationData(prev => ({ ...prev, residency: e.target.value }))}
+                    type="password"
+                    placeholder="Password (min 6 characters)"
+                    value={registerData.password}
+                    onChange={(e) => setRegisterData(prev => ({ ...prev, password: e.target.value }))}
                     className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
                     disabled={isLoading}
                     required
+                    minLength={6}
                   />
-                  <Button 
+                  <Input
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={registerData.confirmPassword}
+                    onChange={(e) => setRegisterData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
+                    disabled={isLoading}
+                    required
+                    minLength={6}
+                  />
+                  <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Submitting Application..." : "Apply for Beta"}
+                    {isLoading ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
+                
+                <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <p className="text-xs text-blue-300">
+                    <strong>Note:</strong> Only approved beta users can create accounts. 
+                    Your email must be registered in our beta program.
+                  </p>
+                </div>
               </CardContent>
             </TabsContent>
           </Tabs>
         </Card>
 
-        {/* Footer */}
+        {/* Back to Home */}
         <div className="text-center mt-6">
-          <p className="text-white/50 text-sm">
-            Need help? <Link href="/" className="text-gold hover:text-gold/80">Contact Support</Link>
-          </p>
+          <Link href="/">
+            <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/5">
+              ← Back to Home
+            </Button>
+          </Link>
         </div>
       </div>
     </div>
