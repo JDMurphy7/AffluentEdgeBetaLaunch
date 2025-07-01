@@ -74,6 +74,7 @@ export class HubSpotService {
           email: email,
           firstname: firstName || '',
           lastname: lastName || '',
+          company: residency || 'Unknown Location',
           country: residency || '',
           country_of_residence: residency || '',
           beta_signup_date: new Date().toISOString(),
