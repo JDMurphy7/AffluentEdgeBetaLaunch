@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
 import PerformanceCards from "@/components/dashboard/performance-cards";
@@ -7,9 +8,14 @@ import RecentTrades from "@/components/dashboard/recent-trades";
 import StrategyPerformance from "@/components/dashboard/strategy-performance";
 import TradeInput from "@/components/dashboard/trade-input";
 import AIAnalysis from "@/components/dashboard/ai-analysis";
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { AlertCircle } from "lucide-react";
 
 export default function Dashboard() {
-  const [selectedUserId] = useState(1); // TODO: Get from auth context
+  const { user } = useAuth();
+  const [selectedUserId] = useState(user?.id || 1); // Use actual user ID or demo ID
+  const isDemoMode = !user;
 
   return (
     <div className="min-h-screen">
@@ -17,6 +23,36 @@ export default function Dashboard() {
       <div className="flex pt-16">
         <Sidebar userId={selectedUserId} />
         <main className="flex-1 ml-64 p-6 space-y-6">
+          {/* Demo Mode Banner */}
+          {isDemoMode && (
+            <div className="bg-gradient-to-r from-gold/20 to-bronze/20 border border-gold/30 rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <AlertCircle className="h-5 w-5 text-gold" />
+                  <div>
+                    <h3 className="text-white font-semibold">Demo Mode</h3>
+                    <p className="text-white/70 text-sm">
+                      This is a showcase of AffluentEdge's full trading platform capabilities
+                    </p>
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <Link href="/auth">
+                    <Button 
+                      className="bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90"
+                    >
+                      Sign Up for Beta
+                    </Button>
+                  </Link>
+                  <Link href="/">
+                    <Button variant="ghost" className="text-white hover:text-gold">
+                      Back to Home
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Dashboard Header */}
           <div className="flex items-center justify-between">
             <div>

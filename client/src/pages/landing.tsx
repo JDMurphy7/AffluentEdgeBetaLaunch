@@ -209,17 +209,32 @@ export default function Landing() {
               Limited spots available. No spam, ever.
             </p>
             
-            {/* Login Link */}
-            <div className="mt-6 pt-4 border-t border-white/10">
-              <p className="text-xs text-white/60 mb-2">Already have beta access?</p>
+            {/* Action Buttons */}
+            <div className="mt-6 pt-4 border-t border-white/10 space-y-3">
+              <p className="text-xs text-white/60 mb-3">Already have beta access?</p>
+              
+              {/* Login Button */}
               <Link href="/auth">
                 <Button 
-                  variant="ghost" 
-                  className="w-full text-gold hover:text-gold/90 hover:bg-gold/5 border border-gold/20"
+                  className="w-full bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90"
                 >
-                  Sign In to Your Account
+                  Log In
                 </Button>
               </Link>
+              
+              {/* Demo Dashboard Button */}
+              <Link href="/dashboard">
+                <Button 
+                  variant="ghost" 
+                  className="w-full text-white hover:text-gold hover:bg-gold/5 border border-white/20"
+                >
+                  Demo Dashboard
+                </Button>
+              </Link>
+              
+              <p className="text-xs text-white/50 text-center">
+                Demo dashboard showcases the full platform
+              </p>
             </div>
           </div>
         </div>

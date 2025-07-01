@@ -17,7 +17,7 @@ import AddTrade from "@/pages/add-trade";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
 
-function ProtectedRoute({ component: Component }: { component: () => JSX.Element }) {
+function ProtectedRoute({ component: Component, allowDemo = false }: { component: () => JSX.Element, allowDemo?: boolean }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -31,7 +31,7 @@ function ProtectedRoute({ component: Component }: { component: () => JSX.Element
     );
   }
 
-  if (!user) {
+  if (!user && !allowDemo) {
     return <AuthPage />;
   }
 
@@ -46,7 +46,7 @@ function Router() {
       <Route path="/" component={user ? Dashboard : Landing} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/dashboard">
-        <ProtectedRoute component={Dashboard} />
+        <ProtectedRoute component={Dashboard} allowDemo={true} />
       </Route>
       <Route path="/community">
         <ProtectedRoute component={Community} />
