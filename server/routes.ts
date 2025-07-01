@@ -238,9 +238,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const betaRequestSchema = z.object({
         email: z.string().email("Invalid email address"),
-        firstName: z.string().optional(),
-        lastName: z.string().optional(),
-        residency: z.string().optional(),
+        firstName: z.string().min(1, "First name is required").refine(val => val.trim().length > 0, "First name cannot be empty"),
+        lastName: z.string().min(1, "Last name is required").refine(val => val.trim().length > 0, "Last name cannot be empty"),
+        residency: z.string().min(1, "Country/region is required").refine(val => val.trim().length > 0, "Country/region cannot be empty"),
         company: z.string().optional(),
         tradingExperience: z.string().optional(),
         assetClasses: z.array(z.string()).optional(),

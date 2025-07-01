@@ -24,10 +24,10 @@ export default function Landing() {
 
   const handleBetaRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.email || !formData.firstName || !formData.lastName) {
+    if (!formData.email || !formData.firstName || !formData.lastName || !formData.residency) {
       toast({
         title: "Required Fields Missing",
-        description: "Please fill in your email, first name, and last name.",
+        description: "Please fill in all required fields including your country.",
         variant: "destructive",
       });
       return;
@@ -181,11 +181,12 @@ export default function Landing() {
               
               <Input
                 type="text"
-                placeholder="Country/Region (optional)"
+                placeholder="Country/Region *"
                 value={formData.residency}
                 onChange={(e) => setFormData(prev => ({ ...prev, residency: e.target.value }))}
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
                 disabled={isSubmitting}
+                required
               />
               
               <Button
