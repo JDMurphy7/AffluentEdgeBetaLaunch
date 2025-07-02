@@ -361,6 +361,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/admin/block-user", requireSimpleAdmin, async (req, res) => {
+    try {
+      const { contactId, email } = req.body;
+      
+      if (!contactId || !email) {
+        return res.status(400).json({ error: "Contact ID and email required" });
+      }
+
+      // Update status in HubSpot to blocked
+      await hubspotService.updateBetaStatus(contactId, 'inactive');
+      
+      // Also update user status in our database if they exist
+      const user = await storage.getUserByEmail(email);
+      if (user) {
+        await storage.updateUserBetaStatus(user.id, 'blocked');
+      }
+      
+      res.json({ success: true, message: "User blocked successfully" });
+    } catch (error) {
+      console.error("Failed to block user:", error);
+      res.status(500).json({ error: "Failed to block user" });
+    }
+  });
+
+  app.post("/api/admin/delete-user", requireSimpleAdmin, async (req, res) => {
+    try {
+      const { contactId, email } = req.body;
+      
+      if (!contactId || !email) {
+        return res.status(400).json({ error: "Contact ID and email required" });
+      }
+
+      // First remove user from our database if they exist
+      const user = await storage.getUserByEmail(email);
+      if (user) {
+        // Note: In a production app, you might want to soft delete or archive user data
+        // For now, we'll just update their status
+        await storage.updateUserBetaStatus(user.id, 'deleted');
+      }
+      
+      // Update status in HubSpot
+      await hubspotService.updateBetaStatus(contactId, 'inactive');
+      
+      res.json({ success: true, message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      res.status(500).json({ error: "Failed to delete user" });
+    }
+  });
+
+  // New endpoint to get user credentials for admin panel
+  app.get("/api/admin/user-credentials", requireSimpleAdmin, async (req, res) => {
+    try {
+      // Get all approved/active users with their credentials
+      const users = await storage.getAllUsersWithPasswords();
+      res.json(users);
+    } catch (error) {
+      console.error("Failed to fetch user credentials:", error);
+      res.status(500).json({ error: "Failed to fetch user credentials" });
+    }
+  });
+
   // User routes (protected)
   app.get("/api/user/:id", requireAuth, async (req, res) => {
     try {

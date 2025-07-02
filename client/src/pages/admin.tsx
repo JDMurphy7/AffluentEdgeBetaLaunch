@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
-import { CheckCircle, XCircle, Clock, User, MapPin, Mail } from "lucide-react";
+import { CheckCircle, XCircle, Clock, User, MapPin, Mail, Trash2, Shield, Eye, EyeOff, Key } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
@@ -17,8 +17,17 @@ interface BetaApplicant {
   firstName?: string;
   lastName?: string;
   residency?: string;
-  betaStatus: 'pending' | 'approved' | 'active' | 'inactive';
+  betaStatus: 'pending' | 'approved' | 'active' | 'inactive' | 'blocked' | 'deleted';
   signupDate: string;
+}
+
+interface UserCredential {
+  id: number;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  betaStatus: string;
+  password: string;
 }
 
 export default function AdminDashboard() {
@@ -28,6 +37,8 @@ export default function AdminDashboard() {
 
   const [loginData, setLoginData] = useState({ email: "", adminKey: "" });
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<number>>(new Set());
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +92,20 @@ export default function AdminDashboard() {
           throw new Error("Admin access required");
         }
         throw new Error("Failed to load applicants");
+      }
+      return response.json();
+    },
+  });
+
+  const { data: userCredentials } = useQuery<UserCredential[]>({
+    queryKey: ['/api/admin/user-credentials'],
+    enabled: isAuthenticated && isAdmin && showCredentials,
+    queryFn: async () => {
+      const response = await fetch('/api/admin/user-credentials', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error("Failed to load user credentials");
       }
       return response.json();
     },
@@ -187,6 +212,116 @@ export default function AdminDashboard() {
 
   const handleReject = (contactId: string, email: string) => {
     rejectMutation.mutate({ contactId, email });
+  };
+
+  const blockMutation = useMutation({
+    mutationFn: async ({ contactId, email }: { contactId: string; email: string }) => {
+      const response = await fetch('/api/admin/block-user', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ contactId, email }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to block user: ${errorText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: (_, { email }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/beta-applicants'] });
+      toast({
+        title: "User Blocked",
+        description: `${email} has been blocked from accessing the platform.`,
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in again to continue.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1000);
+        return;
+      }
+      toast({
+        title: "Block Failed",
+        description: "Failed to block user. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async ({ contactId, email }: { contactId: string; email: string }) => {
+      const response = await fetch('/api/admin/delete-user', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ contactId, email }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete user: ${errorText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: (_, { email }) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/beta-applicants'] });
+      toast({
+        title: "User Deleted",
+        description: `${email} has been deleted from the platform.`,
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in again to continue.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1000);
+        return;
+      }
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete user. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleBlock = (contactId: string, email: string) => {
+    blockMutation.mutate({ contactId, email });
+  };
+
+  const handleDelete = (contactId: string, email: string) => {
+    deleteMutation.mutate({ contactId, email });
+  };
+
+  const togglePasswordVisibility = (id: number) => {
+    setVisiblePasswords(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
   };
 
   const filteredApplicants = (applicants || []).filter(applicant => 
@@ -300,10 +435,31 @@ export default function AdminDashboard() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Premium Member Administration</h1>
           <p className="text-white/60">Manage premium membership applications and professional access</p>
+          
+          {/* Tab Navigation */}
+          <div className="flex space-x-4 mt-6">
+            <Button
+              onClick={() => setShowCredentials(false)}
+              className={`${!showCredentials ? 'bg-gold text-charcoal' : 'bg-white/10 text-white hover:bg-white/20'}`}
+            >
+              <User className="w-4 h-4 mr-2" />
+              Beta Applications
+            </Button>
+            <Button
+              onClick={() => setShowCredentials(true)}
+              className={`${showCredentials ? 'bg-gold text-charcoal' : 'bg-white/10 text-white hover:bg-white/20'}`}
+            >
+              <Key className="w-4 h-4 mr-2" />
+              User Credentials
+            </Button>
+          </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Conditional Content */}
+        {!showCredentials ? (
+          <>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="glass-morphism border-white/10">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -415,32 +571,128 @@ export default function AdminDashboard() {
                       </p>
                     </div>
 
-                    {applicant.betaStatus === 'pending' && (
-                      <div className="flex space-x-3">
-                        <Button
-                          onClick={() => handleApprove(applicant.id, applicant.email, applicant.firstName, applicant.lastName)}
-                          disabled={approveMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Approve
-                        </Button>
-                        <Button
-                          onClick={() => handleReject(applicant.id, applicant.email)}
-                          disabled={rejectMutation.isPending}
-                          variant="destructive"
-                        >
-                          <XCircle className="w-4 h-4 mr-2" />
-                          Reject
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex space-x-2 flex-wrap">
+                      {applicant.betaStatus === 'pending' && (
+                        <>
+                          <Button
+                            onClick={() => handleApprove(applicant.id, applicant.email, applicant.firstName, applicant.lastName)}
+                            disabled={approveMutation.isPending}
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Approve
+                          </Button>
+                          <Button
+                            onClick={() => handleReject(applicant.id, applicant.email)}
+                            disabled={rejectMutation.isPending}
+                            variant="destructive"
+                          >
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                      
+                      {(applicant.betaStatus === 'approved' || applicant.betaStatus === 'active') && (
+                        <>
+                          <Button
+                            onClick={() => handleBlock(applicant.id, applicant.email)}
+                            disabled={blockMutation.isPending}
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                          >
+                            <Shield className="w-4 h-4 mr-2" />
+                            Block
+                          </Button>
+                          <Button
+                            onClick={() => handleDelete(applicant.id, applicant.email)}
+                            disabled={deleteMutation.isPending}
+                            variant="destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))
           )}
         </div>
+          </>
+        ) : (
+          /* User Credentials View */
+          <div className="space-y-6">
+            <Card className="glass-morphism border-white/10">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Key className="w-5 h-5 text-gold" />
+                  User Account Credentials
+                </CardTitle>
+                <p className="text-white/60">View login credentials for all approved users</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {userCredentials && userCredentials.length > 0 ? (
+                  userCredentials.map((user) => (
+                    <Card key={user.id} className="bg-white/5 border-white/10">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {user.firstName || 'Unknown'} {user.lastName || 'User'}
+                            </h4>
+                            <p className="text-white/60 text-sm flex items-center gap-2">
+                              <Mail className="w-3 h-3" />
+                              {user.email}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge 
+                                className={`${
+                                  user.betaStatus === 'active' ? 'bg-green-600' : 
+                                  user.betaStatus === 'approved' ? 'bg-blue-600' : 
+                                  'bg-orange-600'
+                                } text-white`}
+                              >
+                                {user.betaStatus}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="text-white/40 text-xs">Password:</p>
+                              <div className="flex items-center gap-2">
+                                <code className="text-gold bg-black/30 px-2 py-1 rounded text-sm">
+                                  {visiblePasswords.has(user.id) ? user.password : '••••••••'}
+                                </code>
+                                <Button
+                                  onClick={() => togglePasswordVisibility(user.id)}
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-white/60 hover:text-white"
+                                >
+                                  {visiblePasswords.has(user.id) ? 
+                                    <EyeOff className="w-4 h-4" /> : 
+                                    <Eye className="w-4 h-4" />
+                                  }
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-white/60">
+                    <Key className="w-12 h-12 mx-auto mb-4 text-white/40" />
+                    <p>No user credentials available</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

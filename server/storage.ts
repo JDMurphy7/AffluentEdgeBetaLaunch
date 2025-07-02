@@ -13,7 +13,7 @@ import {
   type InsertPortfolioSnapshot
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -26,6 +26,9 @@ export interface IStorage {
   linkUserToHubSpot(userId: number, hubspotContactId: string): Promise<void>;
   // Replit Auth methods
   upsertUser(userData: { id: string; email?: string; firstName?: string; lastName?: string; profileImageUrl?: string }): Promise<any>;
+  
+  // Admin methods
+  getAllUsersWithPasswords(): Promise<Array<{ id: number; email: string; firstName?: string; lastName?: string; betaStatus: string; password: string; }>>
 
   // Strategy methods
   getStrategies(): Promise<Strategy[]>;
@@ -348,6 +351,27 @@ export class DatabaseStorage implements IStorage {
     });
 
     return results;
+  }
+  async getAllUsersWithPasswords(): Promise<Array<{ id: number; email: string; firstName?: string; lastName?: string; betaStatus: string; password: string; }>> {
+    const allUsers = await db.select({
+      id: users.id,
+      email: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      betaStatus: users.betaStatus,
+      password: users.password
+    })
+    .from(users)
+    .where(sql`${users.betaStatus} IN ('approved', 'active', 'blocked')`);
+    
+    return allUsers.map(user => ({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName || undefined,
+      lastName: user.lastName || undefined,
+      betaStatus: user.betaStatus,
+      password: user.password
+    }));
   }
 }
 
