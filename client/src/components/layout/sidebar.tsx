@@ -32,7 +32,7 @@ export default function Sidebar({ userId }: SidebarProps) {
       <div className="space-y-6">
         {/* Account Balance */}
         <div className="glass-gold p-4 rounded-xl">
-          <div className="text-sm text-gray-300 mb-1">Account Balance</div>
+          <div className="text-sm text-gray-300 mb-1">Elite Portfolio Value</div>
           <div className="text-2xl font-bold text-white">
             ${displayUser?.accountBalance ? parseFloat(displayUser.accountBalance).toLocaleString('en-US', {
               minimumFractionDigits: 2,
@@ -41,7 +41,7 @@ export default function Sidebar({ userId }: SidebarProps) {
           </div>
           <div className="text-sm text-green-400 flex items-center mt-1">
             <i className="fas fa-arrow-up mr-1"></i>
-            <span>Live Account</span>
+            <span>Premium Active</span>
           </div>
         </div>
 
@@ -49,42 +49,42 @@ export default function Sidebar({ userId }: SidebarProps) {
         <nav className="space-y-2">
           <Link href="/dashboard" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/dashboard' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-chart-line"></i>
-            <span>Dashboard</span>
+            <span>Command Center</span>
           </Link>
           <Link href="/add-trade" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/add-trade' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-plus-circle"></i>
-            <span>Add Trade</span>
+            <span>Log Position</span>
           </Link>
           <Link href="/trade-history" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/trade-history' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-history"></i>
-            <span>Trade History</span>
+            <span>Performance Journal</span>
           </Link>
           <Link href="/ai-analysis" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/ai-analysis' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-brain"></i>
-            <span>AI Analysis</span>
+            <span>Intelligence Hub</span>
           </Link>
           <Link href="/strategies" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/strategies' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-cog"></i>
-            <span>Strategies</span>
+            <span>Elite Systems</span>
           </Link>
           <Link href="/community" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/community' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-users"></i>
-            <span>Community</span>
+            <span>Elite Network</span>
           </Link>
 
           <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-trophy"></i>
-            <span>Leaderboard</span>
+            <span>Elite Rankings</span>
           </button>
           <Link href="/profile" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/profile' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-user-circle"></i>
-            <span>Profile</span>
+            <span>Elite Profile</span>
           </Link>
         </nav>
 
         {/* Strategy Quick Stats */}
         <div className="glass-morphism p-4 rounded-xl">
-          <h3 className="text-sm font-medium text-gray-300 mb-3">Active Strategies</h3>
+          <h3 className="text-sm font-medium text-gray-300 mb-3">Elite Systems</h3>
           <div className="space-y-2">
             {strategies?.slice(0, 3).map((strategy) => (
               <div key={strategy.strategy.id} className="flex justify-between items-center">

@@ -34,16 +34,16 @@ export default function Navbar() {
           {user && (
             <div className="hidden md:flex items-center space-x-8">
               <Link href="/dashboard">
-                <a className="text-white hover:text-gold transition-colors">Dashboard</a>
+                <a className="text-white hover:text-gold transition-colors">Command Center</a>
               </Link>
               <Link href="/strategies">
-                <a className="text-white hover:text-gold transition-colors">Strategies</a>
+                <a className="text-white hover:text-gold transition-colors">Elite Strategies</a>
               </Link>
               <Link href="/community">
-                <a className="text-white hover:text-gold transition-colors">Community</a>
+                <a className="text-white hover:text-gold transition-colors">Trader Community</a>
               </Link>
               <Link href="/ai-analysis">
-                <a className="text-white hover:text-gold transition-colors">Analytics</a>
+                <a className="text-white hover:text-gold transition-colors">Intelligence Hub</a>
               </Link>
             </div>
           )}
@@ -55,7 +55,7 @@ export default function Navbar() {
                 <div className="flex items-center space-x-2 glass-morphism px-3 py-2 rounded-lg">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-sm text-white/70">
-                    {user.betaStatus === 'active' ? 'Beta Active' : 'Live Account'}
+                    {user.betaStatus === 'active' ? 'Elite Member' : 'Premium Account'}
                   </span>
                 </div>
                 
@@ -83,7 +83,7 @@ export default function Navbar() {
               /* Login Button for Non-Authenticated Users */
               <Link href="/auth">
                 <Button className="bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90">
-                  Sign In
+                  Access Elite
                 </Button>
               </Link>
             )}

@@ -31,8 +31,8 @@ export default function Landing() {
     e.preventDefault();
     if (!formData.email || !formData.firstName || !formData.lastName || !formData.residency) {
       toast({
-        title: "Required Fields Missing",
-        description: "Please fill in all required fields including your country.",
+        title: "Complete Your Application",
+        description: "All fields are required to secure your exclusive beta access.",
         variant: "destructive",
       });
       return;
@@ -40,8 +40,8 @@ export default function Landing() {
 
     if (!validateEmail(formData.email)) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
+        title: "Verify Your Email",
+        description: "A valid email address is required for exclusive access.",
         variant: "destructive",
       });
       return;
@@ -65,8 +65,8 @@ export default function Landing() {
       }
 
       toast({
-        title: "Beta Request Submitted!",
-        description: "You'll receive access instructions within 24 hours.",
+        title: "Welcome to AffluentEdge Elite!",
+        description: "Your exclusive beta access will be confirmed within 24 hours. Prepare to elevate your trading.",
       });
       
       setFormData({
@@ -77,8 +77,8 @@ export default function Landing() {
       });
     } catch (error) {
       toast({
-        title: "Submission Failed",
-        description: error instanceof Error ? error.message : "Please try again later.",
+        title: "Connection Issue",
+        description: error instanceof Error ? error.message : "Please retry your exclusive access request.",
         variant: "destructive",
       });
     } finally {
@@ -104,7 +104,7 @@ export default function Landing() {
         </div>
         <Link href="/dashboard">
           <Button variant="outline" className="border-gold/30 text-gold hover:bg-gold/10">
-            Demo Dashboard
+            Experience Demo
           </Button>
         </Link>
       </nav>
@@ -115,21 +115,21 @@ export default function Landing() {
           {/* Beta Badge */}
           <div className="inline-flex items-center space-x-2 glass-morphism px-4 py-2 rounded-full border border-gold/30 mb-8">
             <div className="w-2 h-2 bg-gold rounded-full animate-pulse"></div>
-            <span className="text-gold text-sm font-medium">EXCLUSIVE BETA ACCESS</span>
+            <span className="text-gold text-sm font-medium">ELITE TRADER BETA</span>
           </div>
 
           {/* Main Headline */}
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Elite Trading
+            Welcome to AffluentEdge
             <span className="block bg-gradient-to-r from-gold to-bronze bg-clip-text text-transparent">
-              Journal & Analytics
+              Your Gateway to Elite Trading
             </span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-xl md:text-2xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Professional-grade trading journal with AI-powered analysis, FTMO-style tracking, 
-            and strategy validation for serious traders.
+            Experience the future of trading intelligence—where sophisticated AI meets seamless design 
+            to elevate every trade you make.
           </p>
 
           {/* Feature highlights */}
@@ -138,31 +138,31 @@ export default function Landing() {
               <div className="w-12 h-12 bg-gold/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <i className="fas fa-brain text-gold text-xl"></i>
               </div>
-              <h3 className="text-white font-semibold mb-2">AI-Powered Analysis</h3>
-              <p className="text-white/70 text-sm">Get A-F grades based on discipline, not just profit</p>
+              <h3 className="text-white font-semibold mb-2">Intelligent Trade Analysis</h3>
+              <p className="text-white/70 text-sm">Discover insights that transform discipline into consistent profits</p>
             </div>
 
             <div className="glass-morphism p-6 rounded-xl border border-white/10">
               <div className="w-12 h-12 bg-bronze/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <i className="fas fa-chart-line text-bronze text-xl"></i>
               </div>
-              <h3 className="text-white font-semibold mb-2">FTMO-Style Tracking</h3>
-              <p className="text-white/70 text-sm">Professional equity curves and drawdown monitoring</p>
+              <h3 className="text-white font-semibold mb-2">Elite Performance Tracking</h3>
+              <p className="text-white/70 text-sm">Advanced analytics that reveal your path to consistent profitability</p>
             </div>
 
             <div className="glass-morphism p-6 rounded-xl border border-white/10">
               <div className="w-12 h-12 bg-gold/15 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <i className="fas fa-cogs text-gold text-xl"></i>
               </div>
-              <h3 className="text-white font-semibold mb-2">Strategy Validation</h3>
-              <p className="text-white/70 text-sm">Built-in strategies with adherence scoring</p>
+              <h3 className="text-white font-semibold mb-2">Seamless Strategy Mastery</h3>
+              <p className="text-white/70 text-sm">Validate and perfect your approach with intelligent guidance</p>
             </div>
           </div>
 
           {/* Beta Access Form */}
           <div className="glass-morphism-hero p-8 rounded-2xl border border-gold/20 max-w-md mx-auto animate-floating">
-            <h3 className="text-2xl font-bold text-white mb-2">Request Beta Access</h3>
-            <p className="text-white/70 mb-6">Join elite traders using AffluentEdge</p>
+            <h3 className="text-2xl font-bold text-white mb-2">Secure Your Elite Access</h3>
+            <p className="text-white/70 mb-6">Join the exclusive community transforming trading excellence</p>
             
             <form onSubmit={handleBetaRequest} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -195,7 +195,7 @@ export default function Landing() {
               
               <Input
                 type="text"
-                placeholder="Country/Region *"
+                placeholder="Your Location *"
                 value={formData.residency}
                 onChange={(e) => setFormData(prev => ({ ...prev, residency: e.target.value }))}
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
@@ -211,28 +211,28 @@ export default function Landing() {
                 {isSubmitting ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-charcoal/30 border-t-charcoal rounded-full animate-spin"></div>
-                    <span>Submitting...</span>
+                    <span>Securing Access...</span>
                   </div>
                 ) : (
-                  "Get Beta Access"
+                  "Join the Elite"
                 )}
               </Button>
             </form>
 
             <p className="text-xs text-white/60 mt-4">
-              Limited spots available. No spam, ever.
+              Exclusive access reserved for serious traders. Your privacy is protected.
             </p>
             
             {/* Action Buttons */}
             <div className="mt-6 pt-4 border-t border-white/10 space-y-3">
-              <p className="text-xs text-white/60 mb-3">Already have beta access?</p>
+              <p className="text-xs text-white/60 mb-3">Already secured your access?</p>
               
               {/* Login Button */}
               <Link href="/auth">
                 <Button 
                   className="w-full bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90"
                 >
-                  Log In
+                  Access Your Account
                 </Button>
               </Link>
               
@@ -242,12 +242,12 @@ export default function Landing() {
                   variant="ghost" 
                   className="w-full text-white hover:text-gold hover:bg-gold/5 border border-white/20"
                 >
-                  Demo Dashboard
+                  Experience the Platform
                 </Button>
               </Link>
               
               <p className="text-xs text-white/50 text-center">
-                Demo dashboard showcases the full platform
+                Discover the full potential of elite trading intelligence
               </p>
             </div>
           </div>
@@ -259,10 +259,10 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Trusted by Professional Traders
+              Empowering Elite Traders Worldwide
             </h2>
             <p className="text-white/70 text-lg">
-              Join traders who've elevated their performance with AffluentEdge
+              Discover why top performers choose AffluentEdge to transform their trading journey
             </p>
           </div>
 
@@ -270,19 +270,19 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
             <div className="text-center glass-morphism p-6 rounded-xl border border-white/10">
               <div className="text-3xl font-bold text-gold mb-2">500+</div>
-              <div className="text-white/70">Beta Testers</div>
+              <div className="text-white/70">Elite Members</div>
             </div>
             <div className="text-center glass-morphism p-6 rounded-xl border border-white/10">
               <div className="text-3xl font-bold text-bronze mb-2">95%</div>
-              <div className="text-white/70">Improved Discipline</div>
+              <div className="text-white/70">Performance Enhancement</div>
             </div>
             <div className="text-center glass-morphism p-6 rounded-xl border border-white/10">
               <div className="text-3xl font-bold text-gold mb-2">50K+</div>
-              <div className="text-white/70">Trades Analyzed</div>
+              <div className="text-white/70">Intelligent Insights</div>
             </div>
             <div className="text-center glass-morphism p-6 rounded-xl border border-white/10">
               <div className="text-3xl font-bold text-bronze mb-2">4.9/5</div>
-              <div className="text-white/70">User Rating</div>
+              <div className="text-white/70">Excellence Rating</div>
             </div>
           </div>
         </div>
@@ -296,7 +296,7 @@ export default function Landing() {
             <span className="text-white font-medium">AffluentEdge</span>
           </div>
           <div className="text-white/60 text-sm">
-            © 2025 AffluentEdge. Elite trading tools for serious traders.
+            © 2025 AffluentEdge. Empowering the next generation of elite traders.
           </div>
         </div>
       </footer>

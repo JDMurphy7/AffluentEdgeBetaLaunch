@@ -41,8 +41,8 @@ export default function AuthPage() {
     e.preventDefault();
     if (!loginData.email || !loginData.password) {
       toast({
-        title: "Missing Information",
-        description: "Please enter both email and password.",
+        title: "Complete Your Credentials",
+        description: "Both email and password are required for secure access.",
         variant: "destructive",
       });
       return;
@@ -50,8 +50,8 @@ export default function AuthPage() {
 
     if (!validateEmail(loginData.email)) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
+        title: "Verify Your Email",
+        description: "A valid email address is required for secure access.",
         variant: "destructive",
       });
       return;
@@ -72,15 +72,15 @@ export default function AuthPage() {
       }
 
       toast({
-        title: "Welcome Back!",
-        description: `Hello ${data.user.firstName || 'User'}!`,
+        title: "Welcome to AffluentEdge Elite!",
+        description: `Your trading journey continues, ${data.user.firstName || 'Trader'}!`,
       });
 
       setLocation("/dashboard");
     } catch (error) {
       toast({
-        title: "Login Failed",
-        description: error instanceof Error ? error.message : "Please check your credentials.",
+        title: "Access Denied",
+        description: error instanceof Error ? error.message : "Please verify your elite credentials.",
         variant: "destructive",
       });
     } finally {
@@ -98,8 +98,8 @@ export default function AuthPage() {
     
     if (!betaApplicationData.email || !betaApplicationData.firstName || !betaApplicationData.lastName || !betaApplicationData.residency) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Complete Your Application",
+        description: "All fields are required to secure your exclusive access.",
         variant: "destructive",
       });
       return;
@@ -107,8 +107,8 @@ export default function AuthPage() {
 
     if (!validateEmail(betaApplicationData.email)) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
+        title: "Verify Your Email",
+        description: "A valid email address is required for exclusive access.",
         variant: "destructive",
       });
       return;
@@ -134,8 +134,8 @@ export default function AuthPage() {
       }
 
       toast({
-        title: "Application Submitted!",
-        description: "Your beta application has been submitted. We'll review it and contact you soon.",
+        title: "Welcome to AffluentEdge Elite!",
+        description: "Your exclusive access request is being reviewed. Expect confirmation within 24 hours.",
       });
 
       // Reset form
@@ -147,8 +147,8 @@ export default function AuthPage() {
       });
     } catch (error) {
       toast({
-        title: "Application Failed",
-        description: error instanceof Error ? error.message : "Please try again.",
+        title: "Connection Issue",
+        description: error instanceof Error ? error.message : "Please retry your exclusive access request.",
         variant: "destructive",
       });
     } finally {
@@ -168,8 +168,8 @@ export default function AuthPage() {
               className="h-12 mx-auto mb-4 hover:scale-105 transition-transform duration-200"
             />
           </Link>
-          <h1 className="text-2xl font-bold text-white">Beta Access Portal</h1>
-          <p className="text-white/70 mt-2">Access your trading journal</p>
+          <h1 className="text-2xl font-bold text-white">Elite Trader Access</h1>
+          <p className="text-white/70 mt-2">Enter your exclusive trading command center</p>
         </div>
 
         {/* Auth Forms */}
@@ -180,21 +180,21 @@ export default function AuthPage() {
                 value="login"
                 className="data-[state=active]:bg-gold data-[state=active]:text-charcoal text-white/70"
               >
-                Sign In
+                Access Account
               </TabsTrigger>
               <TabsTrigger 
                 value="register"
                 className="data-[state=active]:bg-gold data-[state=active]:text-charcoal text-white/70"
               >
-                Apply for Beta
+                Join Elite
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="login">
               <CardHeader className="text-center">
-                <CardTitle className="text-white">Welcome Back</CardTitle>
+                <CardTitle className="text-white">Welcome Back, Elite Trader</CardTitle>
                 <CardDescription className="text-white/70">
-                  Sign in to your beta account
+                  Access your exclusive trading command center
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -230,9 +230,9 @@ export default function AuthPage() {
 
             <TabsContent value="register">
               <CardHeader className="text-center">
-                <CardTitle className="text-white">Apply for Beta</CardTitle>
+                <CardTitle className="text-white">Join the Elite</CardTitle>
                 <CardDescription className="text-white/70">
-                  Request access to AffluentEdge beta program
+                  Apply for exclusive access to AffluentEdge premium platform
                 </CardDescription>
               </CardHeader>
               <CardContent>

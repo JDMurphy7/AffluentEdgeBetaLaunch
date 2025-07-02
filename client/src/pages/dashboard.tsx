@@ -30,9 +30,9 @@ export default function Dashboard() {
                 <div className="flex items-center space-x-3">
                   <AlertCircle className="h-5 w-5 text-gold" />
                   <div>
-                    <h3 className="text-white font-semibold">Demo Mode</h3>
+                    <h3 className="text-white font-semibold">Experience Elite Trading</h3>
                     <p className="text-white/70 text-sm">
-                      This is a showcase of AffluentEdge's full trading platform capabilities
+                      Discover the full power of AffluentEdge's intelligent trading platform
                     </p>
                   </div>
                 </div>
@@ -41,12 +41,12 @@ export default function Dashboard() {
                     <Button 
                       className="bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90"
                     >
-                      Sign Up for Beta
+                      Join the Elite
                     </Button>
                   </Link>
                   <Link href="/">
                     <Button variant="ghost" className="text-white hover:text-gold">
-                      Back to Home
+                      Explore Landing
                     </Button>
                   </Link>
                 </div>
@@ -57,10 +57,10 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gradient-gold mb-2">
-                Professional Trading Analytics
+                Elite Command Center
               </h1>
               <p className="text-muted-foreground">
-                Elite discipline tracking for forex, crypto, commodities, stocks & indices • Strategy adherence over profit
+                Master your trading discipline across all markets • Intelligence-driven performance optimization
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -68,7 +68,7 @@ export default function Dashboard() {
                 <i className="fas fa-download mr-2"></i>Export
               </button>
               <button className="gradient-gold text-black px-4 py-2 rounded-lg hover:shadow-lg transition-all font-medium">
-                <i className="fas fa-plus mr-2"></i>Add Trade
+                <i className="fas fa-plus mr-2"></i>Log Position
               </button>
             </div>
           </div>
