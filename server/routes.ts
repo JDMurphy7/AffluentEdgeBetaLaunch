@@ -9,6 +9,37 @@ import { emailService } from "./services/email";
 import { setupAuth, requireAuth, requireActiveBeta, hashPassword, comparePasswords } from "./auth";
 import { setupAuth as setupReplitAuth, isAuthenticated, isAdmin } from "./replitAuth";
 
+// === AGENT SYSTEM INTEGRATION ===
+import { Orchestrator } from './agents/core/orchestrator.js';
+import { AIIntegrationAgent } from './agents/ai-integration/ai-integration-agent.js';
+import { DatabaseAgent } from './agents/database/database-agent.js';
+import { TradeAgent } from './agents/trade-processing/trade-agent.js';
+import { PortfolioAgent } from './agents/portfolio-analytics/portfolio-agent.js';
+import type { AgentConfig } from './agents/core/types.js';
+
+// Fallbacks for agent methods (original functions)
+const fallbackAnalyzeTrade = async (trade: any) => await analyzeTradeWithAI(trade);
+const fallbackGetPortfolioMetrics = async (userId: number) => await storage.getPortfolioMetrics(userId);
+const fallbackGetTrades = async (userId: number, limit?: number) => await storage.getTrades(userId, limit);
+
+// Agent configs (can be loaded from config file/env)
+const aiAgentConfig: AgentConfig = { id: 'ai', name: 'AI Integration Agent', enabled: true, priority: 1, timeout: 10000 };
+const dbAgentConfig: AgentConfig = { id: 'db', name: 'Database Agent', enabled: true, priority: 2, timeout: 5000 };
+const tradeAgentConfig: AgentConfig = { id: 'trade', name: 'Trade Agent', enabled: true, priority: 3, timeout: 2000 };
+const portfolioAgentConfig: AgentConfig = { id: 'portfolio', name: 'Portfolio Agent', enabled: true, priority: 4, timeout: 2000 };
+
+const orchestrator = new Orchestrator();
+const aiAgent = new AIIntegrationAgent(aiAgentConfig, fallbackAnalyzeTrade);
+const dbAgent = new DatabaseAgent(dbAgentConfig, fallbackGetPortfolioMetrics);
+const tradeAgent = new TradeAgent(tradeAgentConfig, () => Promise.resolve(null));
+const portfolioAgent = new PortfolioAgent(portfolioAgentConfig, () => Promise.resolve(null));
+
+orchestrator.registerAgent(aiAgent);
+orchestrator.registerAgent(dbAgent);
+orchestrator.registerAgent(tradeAgent);
+orchestrator.registerAgent(portfolioAgent);
+// === END AGENT SYSTEM INTEGRATION ===
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication systems
   setupAuth(app);
@@ -449,12 +480,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Portfolio routes
   app.get("/api/portfolio/metrics", requireBetaAuth, async (req, res) => {
+    const userId = (req.session as any).betaUser.id;
+    let agentResult;
+    let usedAgent = false;
     try {
-      const userId = (req.session as any).betaUser.id;
-      const metrics = await storage.getPortfolioMetrics(userId);
-      res.json(metrics);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch portfolio metrics" });
+      agentResult = await dbAgent.getPortfolioMetricsOptimized(userId);
+      usedAgent = agentResult.source === 'agent';
+      res.set('X-Agent-Used', usedAgent ? 'dbAgent' : 'fallback');
+      res.set('X-Cache-Hit', String(!!agentResult.cacheHit));
+      res.set('X-Execution-Time', String(agentResult.executionTime));
+      if (agentResult.success) return res.json(agentResult.data);
+      // fallback handled in agent
+      return res.status(500).json({ error: agentResult.error || 'Failed to fetch portfolio metrics' });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || 'Failed to fetch portfolio metrics' });
     }
   });
 
@@ -513,13 +552,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Trade routes
   app.get("/api/trades", requireBetaAuth, async (req, res) => {
+    const userId = (req.session as any).betaUser.id;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    let agentResult;
+    let usedAgent = false;
     try {
-      const userId = (req.session as any).betaUser.id;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-      const trades = await storage.getTrades(userId, limit);
-      res.json(trades);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch trades" });
+      agentResult = await dbAgent.getTradesOptimized(userId, limit);
+      usedAgent = agentResult.source === 'agent';
+      res.set('X-Agent-Used', usedAgent ? 'dbAgent' : 'fallback');
+      res.set('X-Cache-Hit', String(!!agentResult.cacheHit));
+      res.set('X-Execution-Time', String(agentResult.executionTime));
+      if (agentResult.success) return res.json(agentResult.data);
+      // fallback handled in agent
+      return res.status(500).json({ error: agentResult.error || 'Failed to fetch trades' });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || 'Failed to fetch trades' });
     }
   });
 
@@ -538,8 +585,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/trades", requireBetaAuth, async (req, res) => {
     try {
       const userId = (req.session as any).betaUser.id;
-      
-      // Handle date conversion manually
       const requestData = { ...req.body, userId };
       if (requestData.entryTime && typeof requestData.entryTime === 'string') {
         requestData.entryTime = new Date(requestData.entryTime);
@@ -547,48 +592,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (requestData.exitTime && typeof requestData.exitTime === 'string') {
         requestData.exitTime = new Date(requestData.exitTime);
       }
-      
-      // Manual validation for required fields
       if (!requestData.symbol || !requestData.assetClass || !requestData.direction || 
           !requestData.entryPrice || !requestData.quantity || !requestData.entryTime) {
         return res.status(400).json({ error: "Missing required fields" });
       }
-
-      const tradeData = requestData;
-      
-      let processedTrade = tradeData;
-      
-      // If natural language input is provided, parse it first
+      let tradeData = requestData;
       if (tradeData.naturalLanguageInput) {
         try {
           const parsedData = await parseNaturalLanguageInput(tradeData.naturalLanguageInput);
-          processedTrade = {
-            ...tradeData,
-            ...parsedData,
-          };
+          tradeData = { ...tradeData, ...parsedData };
         } catch (parseError) {
           console.error("Failed to parse natural language input:", parseError);
-          // Continue with original data if parsing fails
         }
       }
-
-      // Create the trade
-      const trade = await storage.createTrade(processedTrade);
-
-      // Analyze the trade with AI if it's closed
+      const trade = await storage.createTrade(tradeData);
       if (trade.status === 'closed' && trade.pnl !== null) {
         try {
-          const aiAnalysis = await analyzeTradeWithAI(trade);
-          const updatedTrade = await storage.updateTrade(trade.id, {
-            aiGrade: aiAnalysis.grade,
-            aiAnalysis: aiAnalysis.analysis,
-            strategyAdherence: aiAnalysis.strategyAdherence,
-            riskManagementScore: aiAnalysis.riskManagementScore,
-          });
-          res.json(updatedTrade);
+          const agentResult = await aiAgent.analyzeTradeOptimized(trade);
+          res.set('X-Agent-Used', agentResult.source === 'agent' ? 'aiAgent' : 'fallback');
+          res.set('X-Cache-Hit', String(!!agentResult.cacheHit));
+          res.set('X-Execution-Time', String(agentResult.executionTime));
+          if (agentResult.success && agentResult.data) {
+            const updatedTrade = await storage.updateTrade(trade.id, agentResult.data);
+            return res.json(updatedTrade);
+          } else {
+            return res.json(trade);
+          }
         } catch (aiError) {
-          console.error("Failed to analyze trade with AI:", aiError);
-          res.json(trade); // Return trade without AI analysis if AI fails
+          console.error("Failed to analyze trade with AI agent:", aiError);
+          return res.json(trade);
         }
       } else {
         res.json(trade);
