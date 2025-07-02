@@ -170,8 +170,8 @@ export default function AdminDashboard() {
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Elite Member Administration</h1>
-          <p className="text-white/60">Manage elite membership applications and exclusive access</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Premium Member Administration</h1>
+          <p className="text-white/60">Manage premium membership applications and professional access</p>
         </div>
 
         {/* Stats Cards */}

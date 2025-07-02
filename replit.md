@@ -125,3 +125,4 @@ Changelog:
 - July 02, 2025. Completed comprehensive app-wide copy rewrite with premium brand voice emphasizing confidence, elite status, innovation, and exclusivity across all user-facing components including navigation, landing page, authentication, dashboard, sidebar, admin panel, and email templates
 - July 02, 2025. Refined brand voice to reduce "Elite" overuse and strengthen AffluentEdge brand identity throughout application components and navigation
 - July 02, 2025. Enhanced equity chart with customizable profit targets and drawdown limits, removed FTMO references, and updated balance presets from "challenge accounts" to "popular presets" for better user experience
+- July 02, 2025. Removed excessive "Elite" usage throughout application, replacing with "Premium", "Professional", and "Advanced" terminology for better brand consistency. Added custom dark-themed scrollbars with gold accents to match brand design system

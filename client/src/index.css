@@ -226,3 +226,37 @@
     border-color: var(--bronze);
   }
 }
+
+/* Custom Dark Scrollbar Styling */
+@layer base {
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(15, 15, 15, 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(249, 224, 134, 0.3);
+    border-radius: 4px;
+    border: 1px solid rgba(249, 224, 134, 0.1);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(249, 224, 134, 0.5);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: rgba(15, 15, 15, 0.3);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(249, 224, 134, 0.3) rgba(15, 15, 15, 0.3);
+  }
+}

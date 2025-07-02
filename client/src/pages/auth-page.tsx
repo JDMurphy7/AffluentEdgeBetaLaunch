@@ -72,15 +72,15 @@ export default function AuthPage() {
       }
 
       toast({
-        title: "Welcome to AffluentEdge Elite!",
-        description: `Your trading journey continues, ${data.user.firstName || 'Trader'}!`,
+        title: "Welcome to AffluentEdge!",
+        description: `Your advanced trading journey continues, ${data.user.firstName || 'Trader'}!`,
       });
 
       setLocation("/dashboard");
     } catch (error) {
       toast({
         title: "Access Denied",
-        description: error instanceof Error ? error.message : "Please verify your elite credentials.",
+        description: error instanceof Error ? error.message : "Please verify your account credentials.",
         variant: "destructive",
       });
     } finally {
@@ -99,7 +99,7 @@ export default function AuthPage() {
     if (!betaApplicationData.email || !betaApplicationData.firstName || !betaApplicationData.lastName || !betaApplicationData.residency) {
       toast({
         title: "Complete Your Application",
-        description: "All fields are required to secure your exclusive access.",
+        description: "All fields are required to secure your premium access.",
         variant: "destructive",
       });
       return;
@@ -108,7 +108,7 @@ export default function AuthPage() {
     if (!validateEmail(betaApplicationData.email)) {
       toast({
         title: "Verify Your Email",
-        description: "A valid email address is required for exclusive access.",
+        description: "A valid email address is required for premium access.",
         variant: "destructive",
       });
       return;
@@ -168,8 +168,8 @@ export default function AuthPage() {
               className="h-12 mx-auto mb-4 hover:scale-105 transition-transform duration-200"
             />
           </Link>
-          <h1 className="text-2xl font-bold text-white">Elite Trader Access</h1>
-          <p className="text-white/70 mt-2">Enter your exclusive trading command center</p>
+          <h1 className="text-2xl font-bold text-white">Professional Trader Access</h1>
+          <p className="text-white/70 mt-2">Enter your advanced trading command center</p>
         </div>
 
         {/* Auth Forms */}
@@ -186,7 +186,7 @@ export default function AuthPage() {
                 value="register"
                 className="data-[state=active]:bg-gold data-[state=active]:text-charcoal text-white/70"
               >
-                Join Elite
+                Join Premium
               </TabsTrigger>
             </TabsList>
 

@@ -214,7 +214,7 @@ export default function Landing() {
                     <span>Securing Access...</span>
                   </div>
                 ) : (
-                  "Join the Elite"
+                  "Join Premium"
                 )}
               </Button>
             </form>

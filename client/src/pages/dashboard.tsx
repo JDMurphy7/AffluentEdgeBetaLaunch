@@ -30,7 +30,7 @@ export default function Dashboard() {
                 <div className="flex items-center space-x-3">
                   <AlertCircle className="h-5 w-5 text-gold" />
                   <div>
-                    <h3 className="text-white font-semibold">Experience Elite Trading</h3>
+                    <h3 className="text-white font-semibold">Experience Professional Trading</h3>
                     <p className="text-white/70 text-sm">
                       Discover the full power of AffluentEdge's intelligent trading platform
                     </p>
@@ -41,7 +41,7 @@ export default function Dashboard() {
                     <Button 
                       className="bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90"
                     >
-                      Join the Elite
+                      Join Premium
                     </Button>
                   </Link>
                   <Link href="/">

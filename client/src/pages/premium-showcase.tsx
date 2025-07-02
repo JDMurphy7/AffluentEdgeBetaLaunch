@@ -33,7 +33,7 @@ export default function PremiumShowcase() {
                 <div className="w-24 h-24 bg-gradient-to-br from-gold to-bronze rounded-full p-1">
                   <img
                     src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face"
-                    alt="Elite Trader"
+                    alt="Professional Trader"
                     className="w-full h-full rounded-full object-cover"
                   />
                 </div>
@@ -42,7 +42,7 @@ export default function PremiumShowcase() {
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2">Elite Trader Alex</h1>
+                <h1 className="text-3xl font-bold text-white mb-2">Professional Trader Alex</h1>
                 <div className="flex items-center space-x-4 text-white/80">
                   <Badge className="bg-gold/20 text-gold border-gold/30 font-semibold">
                     <Trophy className="h-3 w-3 mr-1" />
