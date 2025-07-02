@@ -125,7 +125,7 @@ export class HubSpotService {
     }
   }
 
-  async updateBetaStatus(contactId: string, status: 'pending' | 'approved' | 'active' | 'inactive'): Promise<void> {
+  async updateBetaStatus(contactId: string, status: 'pending' | 'approved' | 'active' | 'inactive' | 'blocked' | 'deleted'): Promise<void> {
     try {
       await hubspotClient.crm.contacts.basicApi.update(contactId, {
         properties: {
@@ -406,7 +406,7 @@ export class HubSpotService {
     firstName?: string;
     lastName?: string;
     residency?: string;
-    betaStatus: 'pending' | 'approved' | 'active' | 'inactive';
+    betaStatus: 'pending' | 'approved' | 'active' | 'inactive' | 'blocked' | 'deleted';
     signupDate: string;
   }>> {
     try {
@@ -430,15 +430,17 @@ export class HubSpotService {
         limit: 100
       });
 
-      return response.results.map(contact => ({
-        id: contact.id,
-        email: contact.properties.email || '',
-        firstName: contact.properties.firstname || '',
-        lastName: contact.properties.lastname || '',
-        residency: contact.properties.country_of_residence || '',
-        betaStatus: (contact.properties.beta_status as any) || 'pending',
-        signupDate: contact.properties.beta_signup_date || contact.properties.createdate || new Date().toISOString()
-      }));
+      return response.results
+        .map(contact => ({
+          id: contact.id,
+          email: contact.properties.email || '',
+          firstName: contact.properties.firstname || '',
+          lastName: contact.properties.lastname || '',
+          residency: contact.properties.country_of_residence || '',
+          betaStatus: (contact.properties.beta_status as any) || 'pending',
+          signupDate: contact.properties.beta_signup_date || contact.properties.createdate || new Date().toISOString()
+        }))
+        .filter(contact => contact.betaStatus !== 'deleted'); // Filter out deleted users
     } catch (error) {
       console.error('Failed to fetch beta applicants:', error);
       return [];

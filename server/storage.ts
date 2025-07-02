@@ -362,7 +362,7 @@ export class DatabaseStorage implements IStorage {
       password: users.password
     })
     .from(users)
-    .where(sql`${users.betaStatus} IN ('approved', 'active', 'blocked')`);
+    .where(sql`${users.betaStatus} IN ('approved', 'active', 'blocked') AND ${users.betaStatus} != 'deleted'`);
     
     return allUsers.map(user => ({
       id: user.id,

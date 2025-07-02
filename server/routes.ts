@@ -301,21 +301,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create user in our database for trading functionality
       try {
         const existingUser = await storage.getUserByEmail(email);
+        
+        // Assign specific password for this user
+        const password = email === 'jamiedeanmurphy@gmail.com' ? '@Zeusyboy12' : 'beta2025';
+        const hashedPassword = await hashPassword(password);
+        
         if (!existingUser) {
           const newUser = await storage.createUser({
             email,
-            password: 'beta2025', // Simple default password for beta users
+            password: hashedPassword,
             firstName: firstName || '',
             lastName: lastName || '',
             betaStatus: 'approved',
             accountBalance: '25000.00', // Default starting balance
             hubspotContactId: contactId
           });
-          console.log(`Created new user in database: ${email} (ID: ${newUser.id})`);
+          console.log(`Created new user in database: ${email} (ID: ${newUser.id}) with ${email === 'jamiedeanmurphy@gmail.com' ? 'custom' : 'default'} password`);
         } else {
           // Update existing user
           await storage.updateUserBetaStatus(existingUser.id, 'approved');
           await storage.linkUserToHubSpot(existingUser.id, contactId);
+          // Update password if it's the specific user
+          if (email === 'jamiedeanmurphy@gmail.com') {
+            await storage.updateUser(existingUser.id, { password: hashedPassword });
+            console.log(`Updated password for ${email}`);
+          }
           console.log(`Updated existing user: ${email} (ID: ${existingUser.id})`);
         }
       } catch (dbError) {
@@ -401,8 +411,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateUserBetaStatus(user.id, 'deleted');
       }
       
-      // Update status in HubSpot
-      await hubspotService.updateBetaStatus(contactId, 'inactive');
+      // Update status in HubSpot to 'deleted'
+      await hubspotService.updateBetaStatus(contactId, 'deleted' as any);
       
       res.json({ success: true, message: "User deleted successfully" });
     } catch (error) {
