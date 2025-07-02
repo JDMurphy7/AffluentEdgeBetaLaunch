@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,28 +26,45 @@ export default function AdminDashboard() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const { user, isLoading: authLoading, isAuthenticated, isAdmin } = useAuth();
 
-  // Redirect to login if not authenticated or not admin
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+  const [loginData, setLoginData] = useState({ email: "", adminKey: "" });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(loginData)
+      });
+      
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/user'] });
+        toast({
+          title: "Login Successful",
+          description: "Welcome to the admin panel!",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Login Failed",
+          description: error.error || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
-        title: "Authentication Required",
-        description: "Please log in to access the admin panel.",
+        title: "Login Error",
+        description: "Connection failed. Please try again.",
         variant: "destructive",
       });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 1000);
-    } else if (!authLoading && isAuthenticated && !isAdmin) {
-      toast({
-        title: "Access Denied",
-        description: "Admin privileges required to access this page.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
+    } finally {
+      setIsLoggingIn(false);
     }
-  }, [authLoading, isAuthenticated, isAdmin, toast]);
+  };
 
   const { data: applicants, isLoading, error } = useQuery<BetaApplicant[]>({
     queryKey: ['/api/admin/beta-applicants'],
@@ -212,11 +230,49 @@ export default function AdminDashboard() {
     );
   }
 
-  // Don't render if not authenticated or not admin (useEffect will handle redirects)
-  if (!isAuthenticated || !isAdmin) {
+  // Show login form if not authenticated
+  if (!authLoading && !isAuthenticated) {
     return (
       <div className="min-h-screen bg-charcoal flex items-center justify-center">
-        <div className="text-white">Verifying access...</div>
+        <Card className="glass-morphism border-gold/20 w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-white">Admin Access</CardTitle>
+            <p className="text-white/70">Enter admin credentials to continue</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleAdminLogin} className="space-y-4">
+              <div>
+                <label className="text-white/70 text-sm block mb-1">Email</label>
+                <Input
+                  type="email"
+                  value={loginData.email}
+                  onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
+                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
+                  placeholder="admin@example.com"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-white/70 text-sm block mb-1">Admin Key</label>
+                <Input
+                  type="password"
+                  value={loginData.adminKey}
+                  onChange={(e) => setLoginData(prev => ({ ...prev, adminKey: e.target.value }))}
+                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold"
+                  placeholder="Enter admin key"
+                  required
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90"
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? "Authenticating..." : "Login"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
