@@ -3,16 +3,7 @@ import type { AgentConfig, AgentResult } from '../core/types.js';
 import { CacheManager } from './cache-manager.js';
 import { CostOptimizer } from './cost-optimizer.js';
 import * as openaiService from '../../services/openai.js';
-
-export interface Trade {
-  symbol: string;
-  direction: string;
-  entry: number;
-  exit: number;
-  stopLoss: number;
-  takeProfit: number;
-  [key: string]: any;
-}
+import { analyzeTradeWithAI } from '../../services/openai.js';
 
 export class AIIntegrationAgent extends BaseAgent {
   private cache = new CacheManager<AgentResult>(300);
@@ -27,11 +18,11 @@ export class AIIntegrationAgent extends BaseAgent {
     return this.config.id;
   }
 
-  generateTradeCacheKey(trade: Trade): string {
+  generateTradeCacheKey(trade: any): string {
     return [trade.symbol, trade.direction, trade.entry, trade.exit, trade.stopLoss, trade.takeProfit].join('|');
   }
 
-  async analyzeTradeOptimized(trade: Trade): Promise<AgentResult> {
+  async analyzeTradeOptimized(trade: any): Promise<AgentResult> {
     const start = Date.now();
     const key = this.generateTradeCacheKey(trade);
     let cacheHit = false;
@@ -44,7 +35,8 @@ export class AIIntegrationAgent extends BaseAgent {
         this.costOptimizer.addCostSaved(0.02); // Example: $0.02 per call saved
         return { ...result, cacheHit, executionTime: Date.now() - start, source: 'agent' };
       }
-      const data = await this.executeWithTimeout(() => openaiService.analyzeTrade(trade), this.config.timeout);
+      // Pass the full trade object to analyzeTradeWithAI
+      const data = await this.executeWithTimeout(() => analyzeTradeWithAI(trade), this.config.timeout);
       result = { success: true, data, source: 'agent', executionTime: Date.now() - start };
       this.cache.set(key, result, this.cacheTTL);
       this.updateMetrics(true, Date.now() - start, false);

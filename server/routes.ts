@@ -152,8 +152,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.betaUser = {
         id: existingUser.id,
         email: existingUser.email,
-        firstName: existingUser.firstName,
-        lastName: existingUser.lastName,
+        firstName: String(existingUser.firstName ?? ''),
+        lastName: String(existingUser.lastName ?? ''),
         betaStatus: existingUser.betaStatus
       };
       
@@ -168,7 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      console.error('Beta login error:', error);
+      console.error('Beta login error:', error instanceof Error ? error.message : error);
       res.status(500).json({ error: 'Login failed' });
     }
   });
@@ -608,7 +608,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const trade = await storage.createTrade(tradeData);
       if (trade.status === 'closed' && trade.pnl !== null) {
         try {
-          const agentResult = await aiAgent.analyzeTradeOptimized(trade);
+          // Map trade to required Trade type for agent
+          const agentTrade = {
+            symbol: trade.symbol,
+            direction: trade.direction,
+            entry: Number(trade.entryPrice),
+            exit: trade.exitPrice !== null ? Number(trade.exitPrice) : 0,
+            stopLoss: trade.stopLoss !== null ? Number(trade.stopLoss) : 0,
+            takeProfit: trade.takeProfit !== null ? Number(trade.takeProfit) : 0,
+          };
+          const agentResult = await aiAgent.analyzeTradeOptimized(agentTrade);
           res.set('X-Agent-Used', agentResult.source === 'agent' ? 'aiAgent' : 'fallback');
           res.set('X-Cache-Hit', String(!!agentResult.cacheHit));
           res.set('X-Execution-Time', String(agentResult.executionTime));
@@ -766,8 +775,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contactId: contact.id
       });
     } catch (error) {
-      console.error("Beta access error:", error);
-      if (error.message && error.message.includes('CRM')) {
+      console.error('Beta access error:', error instanceof Error ? error.message : error);
+      const err = error as any;
+      if (typeof err === 'object' && err && 'message' in err && typeof err.message === 'string' && err.message.includes('CRM')) {
         res.status(500).json({ error: "Registration system temporarily unavailable" });
       } else if (error instanceof z.ZodError) {
         res.status(400).json({ error: "Invalid email address provided" });

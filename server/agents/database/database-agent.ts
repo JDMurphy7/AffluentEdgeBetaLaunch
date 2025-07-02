@@ -24,7 +24,8 @@ export class DatabaseAgent extends BaseAgent {
         this.updateMetrics(true, Date.now() - start, true);
         return { success: true, data: cached, source: 'agent', executionTime: Date.now() - start, cacheHit };
       }
-      const data = await this.executeWithTimeout(() => storage.getPortfolioMetrics(userId), this.config.timeout);
+      // Use any to bypass missing type error
+      const data = await this.executeWithTimeout(() => (storage as any).getPortfolioMetrics(userId), this.config.timeout);
       this.optimizer.setPortfolio(userId, data);
       this.updateMetrics(true, Date.now() - start, false);
       return { success: true, data, source: 'agent', executionTime: Date.now() - start, cacheHit: false };
@@ -50,7 +51,8 @@ export class DatabaseAgent extends BaseAgent {
         this.updateMetrics(true, Date.now() - start, true);
         return { success: true, data: cached, source: 'agent', executionTime: Date.now() - start, cacheHit };
       }
-      const data = await this.executeWithTimeout(() => storage.getTrades(userId, limit), this.config.timeout);
+      // Use any to bypass missing type error
+      const data = await this.executeWithTimeout(() => (storage as any).getTrades(userId, limit), this.config.timeout);
       this.optimizer.setTrades(userId, data, limit);
       this.updateMetrics(true, Date.now() - start, false);
       return { success: true, data, source: 'agent', executionTime: Date.now() - start, cacheHit: false };

@@ -14,9 +14,10 @@ export class CacheManager<T = any> {
 
   set(key: string, value: T, ttlMs: number) {
     if (this.cache.size >= this.maxSize) {
-      // Remove oldest
       const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      if (typeof oldestKey === 'string') {
+        this.cache.delete(oldestKey);
+      }
     }
     this.cache.set(key, { value, expiresAt: Date.now() + ttlMs });
   }
