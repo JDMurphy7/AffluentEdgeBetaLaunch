@@ -84,6 +84,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // Beta user authentication system
+  app.post('/api/auth/beta-login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password required' });
+      }
+      
+      // Check if user exists in our database
+      const existingUser = await storage.getUserByEmail(email);
+      if (!existingUser) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // Check beta status
+      if (existingUser.betaStatus !== 'approved' && existingUser.betaStatus !== 'active') {
+        return res.status(403).json({ error: 'Beta access not approved' });
+      }
+      
+      // For now, use simple password check (in production, use proper hashing)
+      const isValidPassword = password === 'beta2025' || password === existingUser.email; // Simple check
+      
+      if (!isValidPassword) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // Create session
+      req.session.betaUser = {
+        id: existingUser.id,
+        email: existingUser.email,
+        firstName: existingUser.firstName,
+        lastName: existingUser.lastName,
+        betaStatus: existingUser.betaStatus
+      };
+      
+      res.json({ 
+        success: true, 
+        user: {
+          id: existingUser.id,
+          email: existingUser.email,
+          firstName: existingUser.firstName,
+          lastName: existingUser.lastName,
+          betaStatus: existingUser.betaStatus
+        }
+      });
+    } catch (error) {
+      console.error('Beta login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+
+  app.get('/api/auth/beta-user', async (req, res) => {
+    try {
+      if (req.session.betaUser) {
+        res.json(req.session.betaUser);
+      } else {
+        res.status(401).json({ error: 'Not authenticated' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get user' });
+    }
+  });
+
+  app.post('/api/auth/beta-logout', async (req, res) => {
+    req.session.betaUser = null;
+    res.json({ success: true });
+  });
+
+  // Beta user middleware
+  const requireBetaAuth = (req: any, res: any, next: any) => {
+    if (req.session.betaUser) {
+      next();
+    } else {
+      res.status(401).json({ error: 'Authentication required' });
+    }
+  };
+
   // Admin routes with simple authentication
   app.get("/api/admin/beta-applicants", requireSimpleAdmin, async (req, res) => {
     try {
@@ -107,6 +185,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update status in HubSpot
       await hubspotService.updateBetaStatus(contactId, 'approved');
       
+      // Create user in our database for trading functionality
+      try {
+        const existingUser = await storage.getUserByEmail(email);
+        if (!existingUser) {
+          const newUser = await storage.createUser({
+            email,
+            password: 'beta2025', // Simple default password for beta users
+            firstName: firstName || '',
+            lastName: lastName || '',
+            betaStatus: 'approved',
+            accountBalance: '25000.00', // Default starting balance
+            hubspotContactId: contactId
+          });
+          console.log(`Created new user in database: ${email} (ID: ${newUser.id})`);
+        } else {
+          // Update existing user
+          await storage.updateUserBetaStatus(existingUser.id, 'approved');
+          await storage.linkUserToHubSpot(existingUser.id, contactId);
+          console.log(`Updated existing user: ${email} (ID: ${existingUser.id})`);
+        }
+      } catch (dbError) {
+        console.error("Failed to create/update user in database:", dbError);
+        // Continue with email sending even if database fails
+      }
+      
       // Send welcome email via HubSpot
       const emailSent = await hubspotService.sendWelcomeEmail(contactId, email, firstName);
 
@@ -118,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ 
         success: true, 
-        message: "User approved successfully and welcome email sent",
+        message: "User approved successfully, added to trading system, and welcome email sent",
         emailSent 
       });
     } catch (error) {
@@ -160,6 +263,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Portfolio routes
+  app.get("/api/portfolio/metrics", requireBetaAuth, async (req, res) => {
+    try {
+      const userId = (req.session as any).betaUser.id;
+      const metrics = await storage.getPortfolioMetrics(userId);
+      res.json(metrics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch portfolio metrics" });
+    }
+  });
+
+  app.get("/api/portfolio/snapshots", requireBetaAuth, async (req, res) => {
+    try {
+      const userId = (req.session as any).betaUser.id;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 30;
+      const snapshots = await storage.getPortfolioSnapshots(userId, limit);
+      res.json(snapshots);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch portfolio snapshots" });
+    }
+  });
+
+  // Legacy routes for compatibility
   app.get("/api/portfolio/:userId/metrics", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
@@ -202,6 +327,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Trade routes
+  app.get("/api/trades", requireBetaAuth, async (req, res) => {
+    try {
+      const userId = (req.session as any).betaUser.id;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const trades = await storage.getTrades(userId, limit);
+      res.json(trades);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch trades" });
+    }
+  });
+
+  // Legacy route for compatibility
   app.get("/api/trades/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
@@ -213,9 +350,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/trades", async (req, res) => {
+  app.post("/api/trades", requireBetaAuth, async (req, res) => {
     try {
-      const userId = req.session.userId || 1;
+      const userId = (req.session as any).betaUser.id;
       
       // Handle date conversion manually
       const requestData = { ...req.body, userId };
