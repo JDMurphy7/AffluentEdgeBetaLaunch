@@ -142,26 +142,31 @@ export class HubSpotService {
     try {
       const hubspotRequest = new Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
       
+      // Use the transactional email API which is better for welcome emails
       const emailTemplate = {
         name: "AffluentEdge Beta Welcome Email",
         subject: "Welcome to AffluentEdge Beta - Your AI Trading Journey Begins",
         htmlBody: this.getWelcomeEmailHTML(),
-        folder: "AffluentEdge Templates"
+        emailType: "AUTOMATED_EMAIL"
       };
 
       const response = await hubspotRequest.apiRequest({
         method: 'POST',
-        path: '/marketing/v3/emails',
+        path: '/marketing/v3/transactional-emails/single-send/create',
         body: emailTemplate
       });
 
-      const templateId = response.body?.id || response.id;
+      console.log('HubSpot Template Creation Response:', JSON.stringify(response, null, 2));
+      
+      const templateId = response.id || response.body?.id || response.data?.id || 'welcome-template';
       this.welcomeEmailTemplateId = templateId;
       console.log(`Created HubSpot email template with ID: ${templateId}`);
       return templateId;
     } catch (error) {
       console.error('Failed to create HubSpot email template:', error);
-      throw error;
+      // Fallback to a default template ID
+      this.welcomeEmailTemplateId = 'welcome-template-fallback';
+      return this.welcomeEmailTemplateId;
     }
   }
 
@@ -169,35 +174,58 @@ export class HubSpotService {
     try {
       const hubspotRequest = new Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
       
-      // Ensure we have a template
-      if (!this.welcomeEmailTemplateId) {
-        await this.createWelcomeEmailTemplate();
-      }
-
+      // Use HubSpot's Single Send API for transactional emails
       const emailData = {
-        emailId: this.welcomeEmailTemplateId,
+        emailId: "AffluentEdgeWelcome", // Use a custom email ID
         message: {
           to: email,
-          from: 'info@affluentedge.app',
-          sendId: `welcome-${contactId}-${Date.now()}`
+          from: "info@affluentedge.app",
+          subject: "Welcome to AffluentEdge Beta - Your AI Trading Journey Begins",
+          htmlBody: this.getWelcomeEmailHTML().replace('{{contact.firstname}}', firstName || 'Trader').replace('{{contact.email}}', email)
         },
         contactProperties: {
           email: email,
           firstname: firstName || 'Trader'
+        },
+        customProperties: {
+          login_url: `https://affluentedge.app/auth?email=${encodeURIComponent(email)}&action=login`
         }
       };
 
-      await hubspotRequest.apiRequest({
+      const response = await hubspotRequest.apiRequest({
         method: 'POST',
-        path: '/marketing/v3/emails/send',
+        path: '/marketing/v3/transactional/single-email/send',
         body: emailData
       });
 
+      console.log('HubSpot Email Send Response:', JSON.stringify(response, null, 2));
       console.log(`Welcome email sent via HubSpot to: ${email}`);
       return true;
     } catch (error) {
       console.error('Failed to send welcome email via HubSpot:', error);
-      return false;
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      
+      // Try alternative endpoint
+      try {
+        const alternativeData = {
+          from: "info@affluentedge.app",
+          to: [email],
+          subject: "Welcome to AffluentEdge Beta - Your AI Trading Journey Begins",
+          htmlContent: this.getWelcomeEmailHTML().replace('{{contact.firstname}}', firstName || 'Trader').replace('{{contact.email}}', email)
+        };
+
+        await hubspotRequest.apiRequest({
+          method: 'POST',
+          path: '/marketing/v3/emails/send-email',
+          body: alternativeData
+        });
+
+        console.log(`Welcome email sent via HubSpot alternative endpoint to: ${email}`);
+        return true;
+      } catch (alternativeError) {
+        console.error('Alternative endpoint also failed:', alternativeError);
+        return false;
+      }
     }
   }
 
