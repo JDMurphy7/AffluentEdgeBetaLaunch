@@ -192,7 +192,7 @@ export default function AuthPage() {
 
             <TabsContent value="login">
               <CardHeader className="text-center">
-                <CardTitle className="text-white">Welcome Back, Elite Trader</CardTitle>
+                <CardTitle className="text-white">Welcome Back, Trader</CardTitle>
                 <CardDescription className="text-white/70">
                   Access your exclusive trading command center
                 </CardDescription>
