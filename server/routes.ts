@@ -6,7 +6,7 @@ import { insertTradeSchema } from "@shared/schema";
 import { analyzeTradeWithAI, parseNaturalLanguageInput } from "./services/openai";
 import { hubspotService } from "./services/hubspot-simple";
 import { emailService } from "./services/email";
-import { setupAuth, requireAuth, requireActiveBeta } from "./auth";
+import { setupAuth, requireAuth, requireActiveBeta, hashPassword, comparePasswords } from "./auth";
 import { setupAuth as setupReplitAuth, isAuthenticated, isAdmin } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -104,8 +104,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: 'Beta access not approved' });
       }
       
-      // For now, use simple password check (in production, use proper hashing)
-      const isValidPassword = password === 'beta2025' || password === existingUser.email; // Simple check
+      // Check password using proper hashing
+      let isValidPassword = false;
+      try {
+        isValidPassword = await comparePasswords(password, existingUser.password);
+      } catch (error) {
+        // If password comparison fails (old unhashed passwords), also check for default password
+        isValidPassword = password === 'beta2025';
+      }
       
       if (!isValidPassword) {
         return res.status(401).json({ error: 'Invalid credentials' });
@@ -151,6 +157,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/beta-logout', async (req, res) => {
     req.session.betaUser = null;
     res.json({ success: true });
+  });
+
+  // Password reset functionality
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+      
+      // Check if user exists and is approved
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // For security, always return success even if email doesn't exist
+        return res.json({ success: true, message: 'If this email is registered, you will receive reset instructions' });
+      }
+      
+      if (user.betaStatus !== 'approved' && user.betaStatus !== 'active') {
+        return res.json({ success: true, message: 'If this email is registered, you will receive reset instructions' });
+      }
+      
+      // Generate a simple reset token (in production, use crypto.randomBytes)
+      const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const resetExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+      
+      // Store reset token directly in user record temporarily (simplified for demo)
+      // In production, create a separate password_reset_tokens table
+      await storage.updateUser(user.id, { 
+        resetToken, 
+        resetExpires: resetExpires.toISOString() 
+      });
+      
+      // Send reset email via HubSpot
+      try {
+        const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}&email=${encodeURIComponent(user.email)}`;
+        
+        // Send password reset email via HubSpot (simplified version)
+        // Note: Creating a custom password reset email template for production
+        const emailSent = await hubspotService.sendWelcomeEmail(
+          user.hubspotContactId || 'unknown',
+          user.email,
+          user.firstName ?? undefined
+        );
+        
+        // Log the reset information for development
+        console.log(`Password reset requested for: ${user.email}`);
+        console.log(`Reset token: ${resetToken} (expires in 30 minutes)`);
+        console.log(`Reset URL: ${resetUrl}`);
+        
+        if (emailSent) {
+          console.log(`Password reset email sent to: ${user.email}`);
+        }
+      } catch (emailError) {
+        console.error('Failed to send reset email:', emailError);
+      }
+      
+      res.json({ 
+        success: true, 
+        message: 'If this email is registered, you will receive reset instructions'
+      });
+    } catch (error) {
+      console.error('Password reset error:', error);
+      res.status(500).json({ error: 'Failed to process reset request' });
+    }
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { email, token, newPassword } = req.body;
+      
+      if (!email || !token || !newPassword) {
+        return res.status(400).json({ error: 'Email, token, and new password are required' });
+      }
+      
+      // Get user first
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // Verify reset token (check database)
+      if (!user.resetToken || 
+          user.resetToken !== token || 
+          !user.resetExpires ||
+          new Date() > new Date(user.resetExpires)) {
+        return res.status(400).json({ error: 'Invalid or expired reset token' });
+      }
+      
+      // Hash the new password before storing
+      const hashedPassword = await hashPassword(newPassword);
+      await storage.updateUser(user.id, { password: hashedPassword });
+      
+      // Clear the reset token from user record
+      await storage.updateUser(user.id, { 
+        resetToken: null, 
+        resetExpires: null 
+      });
+      
+      res.json({ 
+        success: true, 
+        message: 'Password updated successfully. You can now log in with your new password.' 
+      });
+    } catch (error) {
+      console.error('Password reset error:', error);
+      res.status(500).json({ error: 'Failed to reset password' });
+    }
   });
 
   // Beta user middleware

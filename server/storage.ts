@@ -20,6 +20,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User>;
+  updateUser(userId: number, updates: Partial<User>): Promise<User>;
   updateUserBalance(userId: number, balance: string): Promise<void>;
   updateUserBetaStatus(userId: number, status: string): Promise<void>;
   linkUserToHubSpot(userId: number, hubspotContactId: string): Promise<void>;
@@ -82,6 +83,15 @@ export class DatabaseStorage implements IStorage {
       .values(insertUser)
       .returning();
     return user;
+  }
+
+  async updateUser(userId: number, updates: Partial<User>): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser;
   }
 
   async updateUserBalance(userId: number, balance: string): Promise<void> {

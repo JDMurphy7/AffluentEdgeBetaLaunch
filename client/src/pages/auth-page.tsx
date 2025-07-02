@@ -8,6 +8,100 @@ import { Link, useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import affluentEdgeLogo from "@assets/Affluent Edge (2)_1751360237178.png";
 
+// Forgot Password Component
+function ForgotPasswordForm() {
+  const [email, setEmail] = useState("");
+  const [isResetMode, setIsResetMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email })
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Reset Instructions Sent",
+          description: "If this email is registered, you'll receive reset instructions shortly.",
+        });
+        setIsResetMode(false);
+        setEmail("");
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Reset Failed",
+          description: error.error || "Failed to process reset request.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Connection Error",
+        description: "Please check your connection and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isResetMode) {
+    return (
+      <div className="space-y-3">
+        <form onSubmit={handleForgotPassword} className="space-y-3">
+          <Input
+            type="email"
+            placeholder="Enter your email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-gold text-sm"
+            disabled={isLoading}
+            required
+          />
+          <div className="flex space-x-2">
+            <Button 
+              type="submit"
+              size="sm"
+              className="flex-1 bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30"
+              disabled={isLoading}
+            >
+              {isLoading ? "Sending..." : "Send Reset"}
+            </Button>
+            <Button 
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setIsResetMode(false)}
+              className="text-white/70 hover:text-white"
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => setIsResetMode(true)}
+      className="text-gold hover:text-bronze transition-colors text-sm underline"
+    >
+      Forgot your password?
+    </button>
+  );
+}
+
 interface LoginFormData {
   email: string;
   password: string;
@@ -225,6 +319,10 @@ export default function AuthPage() {
                     {isLoading ? "Signing In..." : "Sign In"}
                   </Button>
                 </form>
+                
+                <div className="mt-4 text-center">
+                  <ForgotPasswordForm />
+                </div>
               </CardContent>
             </TabsContent>
 

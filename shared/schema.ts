@@ -13,6 +13,8 @@ export const users = pgTable("users", {
   customBalance: boolean("custom_balance").notNull().default(false),
   betaStatus: varchar("beta_status").notNull().default('pending'), // pending, approved, active, inactive
   hubspotContactId: varchar("hubspot_contact_id"), // Link to HubSpot contact
+  resetToken: varchar("reset_token"), // Password reset token
+  resetExpires: varchar("reset_expires"), // Reset token expiration
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

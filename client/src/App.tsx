@@ -16,6 +16,7 @@ import Profile from "@/pages/profile";
 import AddTrade from "@/pages/add-trade";
 import AuthPage from "@/pages/auth-page";
 import AdminDashboard from "@/pages/admin";
+import ResetPassword from "@/pages/reset-password";
 import NotFound from "@/pages/not-found";
 import PremiumShowcase from "@/pages/premium-showcase";
 
@@ -47,6 +48,7 @@ function Router() {
     <Switch>
       <Route path="/" component={user ? Dashboard : Landing} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/dashboard">
         <ProtectedRoute component={Dashboard} allowDemo={true} />
       </Route>
