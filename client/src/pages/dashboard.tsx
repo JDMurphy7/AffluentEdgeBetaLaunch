@@ -57,7 +57,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gradient-gold mb-2">
-                Elite Command Center
+                Trading Command Center
               </h1>
               <p className="text-muted-foreground">
                 Master your trading discipline across all markets • Intelligence-driven performance optimization

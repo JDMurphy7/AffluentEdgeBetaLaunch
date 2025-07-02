@@ -32,7 +32,7 @@ export default function Sidebar({ userId }: SidebarProps) {
       <div className="space-y-6">
         {/* Account Balance */}
         <div className="glass-gold p-4 rounded-xl">
-          <div className="text-sm text-gray-300 mb-1">Elite Portfolio Value</div>
+          <div className="text-sm text-gray-300 mb-1">Portfolio Value</div>
           <div className="text-2xl font-bold text-white">
             ${displayUser?.accountBalance ? parseFloat(displayUser.accountBalance).toLocaleString('en-US', {
               minimumFractionDigits: 2,
@@ -65,26 +65,26 @@ export default function Sidebar({ userId }: SidebarProps) {
           </Link>
           <Link href="/strategies" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/strategies' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-cog"></i>
-            <span>Elite Systems</span>
+            <span>Trading Systems</span>
           </Link>
           <Link href="/community" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/community' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-users"></i>
-            <span>Elite Network</span>
+            <span>Community</span>
           </Link>
 
           <button className="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white w-full text-left">
             <i className="fas fa-trophy"></i>
-            <span>Elite Rankings</span>
+            <span>Leaderboard</span>
           </button>
           <Link href="/profile" className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors ${location === '/profile' ? 'text-gold bg-white/5' : 'text-white'}`}>
             <i className="fas fa-user-circle"></i>
-            <span>Elite Profile</span>
+            <span>Profile</span>
           </Link>
         </nav>
 
         {/* Strategy Quick Stats */}
         <div className="glass-morphism p-4 rounded-xl">
-          <h3 className="text-sm font-medium text-gray-300 mb-3">Elite Systems</h3>
+          <h3 className="text-sm font-medium text-gray-300 mb-3">Active Systems</h3>
           <div className="space-y-2">
             {strategies?.slice(0, 3).map((strategy) => (
               <div key={strategy.strategy.id} className="flex justify-between items-center">

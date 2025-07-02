@@ -11,14 +11,16 @@ export default function EquityChart({ userId }: EquityChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
   const [initialBalance, setInitialBalance] = useState(127450);
+  const [profitTargetPercent, setProfitTargetPercent] = useState(10);
+  const [maxDrawdownPercent, setMaxDrawdownPercent] = useState(10);
 
   const { data: snapshots, isLoading } = useQuery({
     queryKey: [`/api/portfolio/${userId}/snapshots`],
   });
 
   // Calculate profit target lines based on current balance setting
-  const profitTarget = initialBalance * 1.10; // 10% profit target
-  const maxDrawdownLimit = initialBalance * 0.90; // 10% max drawdown
+  const profitTarget = initialBalance * (1 + profitTargetPercent / 100);
+  const maxDrawdownLimit = initialBalance * (1 - maxDrawdownPercent / 100);
 
   useEffect(() => {
     if (!canvasRef.current || isLoading) return;
@@ -41,7 +43,7 @@ export default function EquityChart({ userId }: EquityChartProps) {
       parseFloat(snapshot.balance)
     ) || [];
 
-    // FTMO-style fallback data ($100k challenge account)
+    // Demo portfolio progression data
     const fallbackLabels = ['Jan 1', 'Jan 15', 'Feb 1', 'Feb 15', 'Mar 1', 'Mar 15', 'Apr 1', 'Apr 15', 'May 1', 'May 15', 'Jun 1', 'Current'];
     const fallbackData = [100000, 105000, 102000, 108000, 115000, 112000, 118000, 125000, 120000, 127000, 124000, 127450];
     
@@ -153,14 +155,14 @@ export default function EquityChart({ userId }: EquityChartProps) {
         chartRef.current.destroy();
       }
     };
-  }, [snapshots, isLoading, initialBalance]);
+  }, [snapshots, isLoading, initialBalance, profitTargetPercent, maxDrawdownPercent]);
 
   return (
     <div className="glass-morphism p-6 rounded-xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-white">FTMO-Style Equity Progression</h2>
-          <p className="text-sm text-gray-400">Track your account like a professional prop firm challenge</p>
+          <h2 className="text-xl font-semibold text-white">Portfolio Equity Progression</h2>
+          <p className="text-sm text-gray-400">Track your trading performance with precision analytics</p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2 text-xs">
@@ -177,6 +179,10 @@ export default function EquityChart({ userId }: EquityChartProps) {
             userId={userId}
             currentBalance={initialBalance}
             onBalanceUpdate={setInitialBalance}
+            profitTargetPercent={profitTargetPercent}
+            maxDrawdownPercent={maxDrawdownPercent}
+            onProfitTargetUpdate={setProfitTargetPercent}
+            onMaxDrawdownUpdate={setMaxDrawdownPercent}
           />
           <select className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white">
             <option>Last 30 Days</option>

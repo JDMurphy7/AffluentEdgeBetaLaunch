@@ -4,16 +4,30 @@ interface BalanceSettingsProps {
   userId: number;
   currentBalance: number;
   onBalanceUpdate: (newBalance: number) => void;
+  profitTargetPercent?: number;
+  maxDrawdownPercent?: number;
+  onProfitTargetUpdate?: (percent: number) => void;
+  onMaxDrawdownUpdate?: (percent: number) => void;
 }
 
-export default function BalanceSettings({ userId, currentBalance, onBalanceUpdate }: BalanceSettingsProps) {
+export default function BalanceSettings({ 
+  userId, 
+  currentBalance, 
+  onBalanceUpdate,
+  profitTargetPercent = 10,
+  maxDrawdownPercent = 10,
+  onProfitTargetUpdate,
+  onMaxDrawdownUpdate
+}: BalanceSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputBalance, setInputBalance] = useState(currentBalance.toString());
+  const [inputProfitTarget, setInputProfitTarget] = useState(profitTargetPercent.toString());
+  const [inputMaxDrawdown, setInputMaxDrawdown] = useState(maxDrawdownPercent.toString());
 
   const presetBalances = [
-    { label: '$25K Challenge', value: 25000 },
-    { label: '$50K Challenge', value: 50000 },
-    { label: '$100K Challenge', value: 100000 },
+    { label: '$25K Account', value: 25000 },
+    { label: '$50K Account', value: 50000 },
+    { label: '$100K Account', value: 100000 },
   ];
 
   const handleBalanceUpdate = (value: number) => {
@@ -52,7 +66,7 @@ export default function BalanceSettings({ userId, currentBalance, onBalanceUpdat
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gold mb-3">Challenge Presets</label>
+            <label className="block text-sm font-medium text-gold mb-3">Popular Presets</label>
             <div className="space-y-2">
               {presetBalances.map((preset) => (
                 <button
@@ -90,13 +104,66 @@ export default function BalanceSettings({ userId, currentBalance, onBalanceUpdat
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gold mb-2">Profit Target %</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="number"
+                  value={inputProfitTarget}
+                  onChange={(e) => setInputProfitTarget(e.target.value)}
+                  placeholder="10"
+                  min="1"
+                  max="100"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gold/50 transition-colors"
+                />
+                <button
+                  onClick={() => {
+                    const value = parseFloat(inputProfitTarget);
+                    if (!isNaN(value) && value > 0 && value <= 100 && onProfitTargetUpdate) {
+                      onProfitTargetUpdate(value);
+                    }
+                  }}
+                  className="px-3 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors text-xs"
+                >
+                  Set
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gold mb-2">Max Drawdown %</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="number"
+                  value={inputMaxDrawdown}
+                  onChange={(e) => setInputMaxDrawdown(e.target.value)}
+                  placeholder="10"
+                  min="1"
+                  max="50"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-gold/50 transition-colors"
+                />
+                <button
+                  onClick={() => {
+                    const value = parseFloat(inputMaxDrawdown);
+                    if (!isNaN(value) && value > 0 && value <= 50 && onMaxDrawdownUpdate) {
+                      onMaxDrawdownUpdate(value);
+                    }
+                  }}
+                  className="px-3 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors text-xs"
+                >
+                  Set
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white/5 p-3 rounded-lg border border-gold/20">
             <div className="flex items-center space-x-2 mb-1">
               <i className="fas fa-info-circle text-gold text-sm"></i>
-              <span className="text-sm font-medium text-gold">FTMO-Style Tracking</span>
+              <span className="text-sm font-medium text-gold">Professional Tracking</span>
             </div>
             <p className="text-xs text-gray-300">
-              Set your starting balance to match your prop firm challenge requirements. 
+              Set your starting balance to match your trading account. 
               This will automatically adjust profit targets and drawdown limits.
             </p>
           </div>

@@ -55,7 +55,7 @@ export default function Navbar() {
                 <div className="flex items-center space-x-2 glass-morphism px-3 py-2 rounded-lg">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-sm text-white/70">
-                    {user.betaStatus === 'active' ? 'Elite Member' : 'Premium Account'}
+                    {user.betaStatus === 'active' ? 'Premium Member' : 'Premium Account'}
                   </span>
                 </div>
                 
@@ -83,7 +83,7 @@ export default function Navbar() {
               /* Login Button for Non-Authenticated Users */
               <Link href="/auth">
                 <Button className="bg-gradient-to-r from-gold to-bronze text-charcoal font-semibold hover:from-gold/90 hover:to-bronze/90">
-                  Access Elite
+                  Access Platform
                 </Button>
               </Link>
             )}
