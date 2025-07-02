@@ -23,6 +23,8 @@ export interface IStorage {
   updateUserBalance(userId: number, balance: string): Promise<void>;
   updateUserBetaStatus(userId: number, status: string): Promise<void>;
   linkUserToHubSpot(userId: number, hubspotContactId: string): Promise<void>;
+  // Replit Auth methods
+  upsertUser(userData: { id: string; email?: string; firstName?: string; lastName?: string; profileImageUrl?: string }): Promise<any>;
 
   // Strategy methods
   getStrategies(): Promise<Strategy[]>;
@@ -104,6 +106,12 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ hubspotContactId })
       .where(eq(users.id, userId));
+  }
+
+  async upsertUser(userData: { id: string; email?: string; firstName?: string; lastName?: string; profileImageUrl?: string }): Promise<any> {
+    // For Replit Auth, we'll just return the user data since we don't store Replit users in our database
+    // This method exists to satisfy the interface requirement
+    return userData;
   }
 
   // Strategy methods

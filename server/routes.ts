@@ -7,11 +7,30 @@ import { analyzeTradeWithAI, parseNaturalLanguageInput } from "./services/openai
 import { hubspotService } from "./services/hubspot-simple";
 import { emailService } from "./services/email";
 import { setupAuth, requireAuth, requireActiveBeta } from "./auth";
+import { setupAuth as setupReplitAuth, isAuthenticated, isAdmin } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication system
+  // Setup authentication systems
   setupAuth(app);
+  await setupReplitAuth(app);
 
+  // Replit Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userClaims = req.user.claims;
+      res.json({
+        id: userClaims.sub,
+        email: userClaims.email,
+        firstName: userClaims.first_name,
+        lastName: userClaims.last_name,
+        profileImageUrl: userClaims.profile_image_url,
+        isAdmin: userClaims.email === 'theaffluentedge@gmail.com'
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
 
 
   // Test HubSpot email
@@ -39,18 +58,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin routes (placed before auth middleware to avoid interference)
-  app.get("/api/admin/beta-applicants", async (req, res) => {
-    console.log("ADMIN ROUTE HIT! Query:", req.query);
-    
+  // Admin routes with proper authentication
+  app.get("/api/admin/beta-applicants", isAdmin, async (req, res) => {
     try {
-      // For now, allow access if any admin parameter is provided
-      if (!req.query.admin) {
-        console.log("No admin parameter provided");
-        return res.status(403).json({ error: "Admin access required - no admin param" });
-      }
-
-      console.log("Admin parameter found:", req.query.admin);
+      console.log("Fetching beta applicants for admin user");
       const applicants = await hubspotService.getBetaApplicants();
       res.json(applicants);
     } catch (error) {
@@ -59,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/approve-user", async (req, res) => {
+  app.post("/api/admin/approve-user", isAdmin, async (req, res) => {
     try {
       const { contactId, email, firstName, lastName } = req.body;
       
@@ -90,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/reject-user", async (req, res) => {
+  app.post("/api/admin/reject-user", isAdmin, async (req, res) => {
     try {
       const { contactId, email } = req.body;
       

@@ -127,3 +127,4 @@ Changelog:
 - July 02, 2025. Enhanced equity chart with customizable profit targets and drawdown limits, removed FTMO references, and updated balance presets from "challenge accounts" to "popular presets" for better user experience
 - July 02, 2025. Removed excessive "Elite" usage throughout application, replacing with "Premium", "Professional", and "Advanced" terminology for better brand consistency. Added custom dark-themed scrollbars with gold accents to match brand design system
 - July 02, 2025. Completed final "Elite" terminology cleanup by updating landing page references and login section welcome message to use "Professional", "Premium", and "Advanced" branding while preserving copyright footer
+- July 02, 2025. Implemented secure admin authentication system using Replit Auth, restricting admin panel access to theaffluentedge@gmail.com only, with proper middleware protection and frontend access control

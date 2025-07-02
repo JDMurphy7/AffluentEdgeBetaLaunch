@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { format } from "date-fns";
 import { CheckCircle, XCircle, Clock, User, MapPin, Mail } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { isUnauthorizedError } from "@/lib/authUtils";
 
 interface BetaApplicant {
   id: string;
@@ -21,21 +23,47 @@ interface BetaApplicant {
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const { user, isLoading: authLoading, isAuthenticated, isAdmin } = useAuth();
+
+  // Redirect to login if not authenticated or not admin
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to access the admin panel.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 1000);
+    } else if (!authLoading && isAuthenticated && !isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "Admin privileges required to access this page.",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+    }
+  }, [authLoading, isAuthenticated, isAdmin, toast]);
 
   const { data: applicants, isLoading, error } = useQuery<BetaApplicant[]>({
     queryKey: ['/api/admin/beta-applicants'],
+    enabled: isAuthenticated && isAdmin, // Only run query if user is authenticated and admin
     queryFn: async () => {
-      // Simple admin access - use configured admin email
-      const adminEmail = "theaffluentedge@gmail.com";
-      
-      const response = await fetch(`/api/admin/beta-applicants?admin=${encodeURIComponent(adminEmail)}`);
+      const response = await fetch('/api/admin/beta-applicants', {
+        credentials: 'include' // Include cookies for session
+      });
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication required");
+        }
         if (response.status === 403) {
-          throw new Error("Admin access required. Please contact support.");
+          throw new Error("Admin access required");
         }
         throw new Error("Failed to load applicants");
       }
-      
       return response.json();
     },
   });
@@ -52,11 +80,13 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ contactId, email, firstName, lastName }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to approve user');
+        const errorText = await response.text();
+        throw new Error(`Failed to approve user: ${errorText}`);
       }
       
       return response.json();
@@ -69,6 +99,17 @@ export default function AdminDashboard() {
       });
     },
     onError: (error) => {
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in again to continue.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1000);
+        return;
+      }
       toast({
         title: "Approval Failed",
         description: "Failed to approve user. Please try again.",
@@ -84,11 +125,13 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ contactId, email }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to reject user');
+        const errorText = await response.text();
+        throw new Error(`Failed to reject user: ${errorText}`);
       }
       
       return response.json();
@@ -101,6 +144,17 @@ export default function AdminDashboard() {
       });
     },
     onError: (error) => {
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in again to continue.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1000);
+        return;
+      }
       toast({
         title: "Rejection Failed",
         description: "Failed to reject user. Please try again.",
@@ -149,6 +203,24 @@ export default function AdminDashboard() {
     );
   };
 
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-charcoal flex items-center justify-center">
+        <div className="text-white">Checking admin access...</div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated or not admin (useEffect will handle redirects)
+  if (!isAuthenticated || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-charcoal flex items-center justify-center">
+        <div className="text-white">Verifying access...</div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-charcoal flex items-center justify-center">
@@ -160,7 +232,7 @@ export default function AdminDashboard() {
   if (error) {
     return (
       <div className="min-h-screen bg-charcoal flex items-center justify-center">
-        <div className="text-red-400">Access denied. Admin privileges required.</div>
+        <div className="text-red-400">Failed to load applicants. Please try again.</div>
       </div>
     );
   }

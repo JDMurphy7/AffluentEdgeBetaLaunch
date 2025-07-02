@@ -57,13 +57,15 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
+  // For admin authentication, we don't need to store Replit users in our database
+  // We just validate the email claim for admin access
+  return {
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
-  });
+  };
 }
 
 export async function setupAuth(app: Express) {
@@ -78,7 +80,7 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user = {};
+    const user: any = {};
     updateUserSession(user, tokens);
     await upsertUser(tokens.claims());
     verified(null, user);
@@ -154,4 +156,43 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
+};
+
+export const isAdmin: RequestHandler = async (req, res, next) => {
+  const user = req.user as any;
+
+  // First check if user is authenticated
+  if (!req.isAuthenticated() || !user.expires_at) {
+    return res.status(401).json({ message: "Authentication required" });
+  }
+
+  // Check if token is still valid
+  const now = Math.floor(Date.now() / 1000);
+  if (now > user.expires_at) {
+    const refreshToken = user.refresh_token;
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const config = await getOidcConfig();
+      const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+      updateUserSession(user, tokenResponse);
+    } catch (error) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+  }
+
+  // Check if user is admin
+  const userEmail = user.claims?.email;
+  const adminEmail = "theaffluentedge@gmail.com";
+  
+  if (userEmail !== adminEmail) {
+    return res.status(403).json({ 
+      message: "Admin access required", 
+      userEmail: userEmail || "unknown" 
+    });
+  }
+
+  return next();
 };
