@@ -56,19 +56,19 @@ function Router() {
         <ProtectedRoute component={Community} allowDemo={true} />
       </Route>
       <Route path="/add-trade">
-        <ProtectedRoute component={AddTrade} />
+        <ProtectedRoute component={AddTrade} allowDemo={true} />
       </Route>
       <Route path="/trade-history">
-        <ProtectedRoute component={TradeHistory} />
+        <ProtectedRoute component={TradeHistory} allowDemo={true} />
       </Route>
       <Route path="/ai-analysis">
-        <ProtectedRoute component={AIAnalysis} />
+        <ProtectedRoute component={AIAnalysis} allowDemo={true} />
       </Route>
       <Route path="/strategies">
         <ProtectedRoute component={Strategies} allowDemo={true} />
       </Route>
       <Route path="/profile">
-        <ProtectedRoute component={Profile} />
+        <ProtectedRoute component={Profile} allowDemo={true} />
       </Route>
       <Route path="/premium-showcase">
         <PremiumShowcase />
