@@ -3,13 +3,13 @@ export class LegacyAgent {
         // Initialize any necessary properties for the legacy agent
     }
 
-    analyzeTrade(tradeData) {
+    analyzeTrade(tradeData: any): any {
         // Implement the original trade analysis logic
         // This method serves as a fallback for the optimizer agent
         return this.performAnalysis(tradeData);
     }
 
-    performAnalysis(tradeData) {
+    performAnalysis(tradeData: any): any {
         // Original analysis logic goes here
         // This is a placeholder for the actual implementation
         return {
@@ -18,13 +18,13 @@ export class LegacyAgent {
         };
     }
 
-    generateTradeCacheKey(tradeData) {
+    generateTradeCacheKey(tradeData: any): string {
         // Generate a cache key based on the trade data
         // This method ensures compatibility with the optimizer agent
         return `legacy-${tradeData.id}`;
     }
 
-    getCostSavings() {
+    getCostSavings(): number {
         // Return a default cost savings value
         return 0; // Legacy agent does not optimize costs
     }

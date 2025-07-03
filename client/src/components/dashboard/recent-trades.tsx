@@ -5,7 +5,7 @@ interface RecentTradesProps {
 }
 
 export default function RecentTrades({ userId }: RecentTradesProps) {
-  const { data: trades, isLoading } = useQuery({
+  const { data: trades, isLoading } = useQuery<any[]>({
     queryKey: [`/api/trades/${userId}`],
   });
 
@@ -83,7 +83,8 @@ export default function RecentTrades({ userId }: RecentTradesProps) {
     );
   }
 
-  const recentTrades = trades?.slice(0, 5) || [];
+  // Ensure trades is an array before using slice
+  const recentTrades = Array.isArray(trades) ? trades.slice(0, 5) : [];
 
   // Demo data for when no trades are available
   const demoTrades = [

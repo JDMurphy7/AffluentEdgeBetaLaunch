@@ -13,6 +13,9 @@ const config = {
             instance: new LegacyAgent(),
         },
     },
+    openAI: {
+        apiKey: process.env.OPENAI_API_KEY || '',
+    },
     caching: {
         enabled: true,
         expirationTime: 3600, // in seconds

@@ -3,17 +3,18 @@ export class OptimizerAgent {
         // Initialization logic for the optimizer agent
     }
 
-    analyzeTradeOptimized(tradeData) {
+    analyzeTradeOptimized(tradeData: any): void {
         // Logic to analyze trade data and optimize for cost savings
         // This method should utilize the OpenAI API efficiently
     }
 
-    generateTradeCacheKey(tradeData) {
+    generateTradeCacheKey(tradeData: any): string {
         // Logic to generate a unique cache key for the trade data
         // This helps in reducing redundant API calls
+        return '';
     }
 
-    getCostSavings(originalCost, optimizedCost) {
+    getCostSavings(originalCost: number, optimizedCost: number): number {
         // Logic to calculate and return the cost savings achieved
         return originalCost - optimizedCost;
     }

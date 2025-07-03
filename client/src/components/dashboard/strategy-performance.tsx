@@ -5,7 +5,7 @@ interface StrategyPerformanceProps {
 }
 
 export default function StrategyPerformance({ userId }: StrategyPerformanceProps) {
-  const { data: strategies, isLoading } = useQuery({
+  const { data: strategies, isLoading } = useQuery<any[]>({
     queryKey: [`/api/strategies/${userId}/performance`],
   });
 
@@ -96,7 +96,7 @@ export default function StrategyPerformance({ userId }: StrategyPerformanceProps
     }
   ];
 
-  const displayStrategies = strategies && strategies.length > 0 ? strategies : defaultStrategies;
+  const displayStrategies = Array.isArray(strategies) && strategies.length > 0 ? strategies : defaultStrategies;
 
   return (
     <div className="glass-morphism p-6 rounded-xl">
@@ -105,7 +105,7 @@ export default function StrategyPerformance({ userId }: StrategyPerformanceProps
         <button className="text-gold hover:text-bronze transition-colors text-sm">Manage</button>
       </div>
       <div className="space-y-4">
-        {displayStrategies.map((strategyData) => (
+        {displayStrategies.map((strategyData: any) => (
           <div key={strategyData.strategy.id} className="p-4 bg-white/5 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-white">{strategyData.strategy.name}</h3>

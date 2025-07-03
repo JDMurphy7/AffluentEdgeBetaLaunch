@@ -7,6 +7,11 @@ interface EquityChartProps {
   userId: number;
 }
 
+interface PortfolioSnapshot {
+  snapshotTime: string;
+  balance: string;
+}
+
 export default function EquityChart({ userId }: EquityChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
@@ -14,7 +19,7 @@ export default function EquityChart({ userId }: EquityChartProps) {
   const [profitTargetPercent, setProfitTargetPercent] = useState(10);
   const [maxDrawdownPercent, setMaxDrawdownPercent] = useState(10);
 
-  const { data: snapshots, isLoading } = useQuery({
+  const { data: snapshots, isLoading } = useQuery<PortfolioSnapshot[]>({
     queryKey: [`/api/portfolio/${userId}/snapshots`],
   });
 
@@ -34,12 +39,12 @@ export default function EquityChart({ userId }: EquityChartProps) {
     if (!ctx) return;
 
     // Process data for chart
-    const labels = snapshots?.slice(-30).map((snapshot) => {
+    const labels = (snapshots ?? []).slice(-30).map((snapshot: PortfolioSnapshot) => {
       const date = new Date(snapshot.snapshotTime);
       return date.toLocaleDateString();
-    }) || [];
+    });
 
-    const balanceData = snapshots?.slice(-30).map((snapshot) => 
+    const balanceData = (snapshots ?? []).slice(-30).map((snapshot: PortfolioSnapshot) => 
       parseFloat(snapshot.balance)
     ) || [];
 
@@ -62,7 +67,7 @@ export default function EquityChart({ userId }: EquityChartProps) {
               const chart = context.chart;
               const {ctx, chartArea} = chart;
               if (!chartArea) {
-                return null;
+                return 'rgba(249, 224, 134, 0.1)';
               }
               const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
               gradient.addColorStop(0, 'rgba(249, 224, 134, 0.3)');
@@ -121,7 +126,10 @@ export default function EquityChart({ userId }: EquityChartProps) {
             bodyColor: '#FFFFFF',
             callbacks: {
               label: function(context) {
-                return 'Balance: $' + context.raw.toLocaleString();
+                if (typeof context.raw === 'number') {
+                  return 'Balance: $' + context.raw.toLocaleString();
+                }
+                return 'Balance: $' + context.raw;
               }
             }
           }

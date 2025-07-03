@@ -20,6 +20,14 @@ interface BetaApplicationData {
   residency: string;
 }
 
+interface RegisterData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -35,6 +43,14 @@ export default function AuthPage() {
     firstName: "",
     lastName: "",
     residency: ""
+  });
+
+  const [registerData, setRegisterData] = useState<RegisterData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -125,6 +141,54 @@ export default function AuthPage() {
     } catch (error) {
       toast({
         title: "Application Failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (registerData.password !== registerData.confirmPassword) {
+      toast({
+        title: "Passwords do not match",
+        description: "Please make sure your passwords match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await apiRequest(
+        "POST",
+        "/api/register",
+        {
+          firstName: registerData.firstName,
+          lastName: registerData.lastName,
+          email: registerData.email,
+          password: registerData.password,
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Registration failed");
+      }
+      toast({
+        title: "Account Created!",
+        description: "Your account has been created. Please sign in.",
+      });
+      setRegisterData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      toast({
+        title: "Registration Failed",
         description: error instanceof Error ? error.message : "Please try again.",
         variant: "destructive",
       });

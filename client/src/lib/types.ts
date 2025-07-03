@@ -4,6 +4,8 @@ export interface User {
   email: string;
   accountBalance: string;
   createdAt: string;
+  firstName?: string | null;
+  lastName?: string | null;
 }
 
 export interface Strategy {

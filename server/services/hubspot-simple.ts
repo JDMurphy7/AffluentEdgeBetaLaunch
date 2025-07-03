@@ -158,7 +158,13 @@ export class HubSpotService {
 
       console.log('HubSpot Template Creation Response:', JSON.stringify(response, null, 2));
       
-      const templateId = response.id || response.body?.id || response.data?.id || 'welcome-template';
+      // Patch: Use runtime type checks for response
+      let templateId = 'welcome-template';
+      if (response && typeof response === 'object') {
+        if ('id' in response && response.id) templateId = String(response.id);
+        else if ('body' in response && response.body && typeof response.body === 'object' && 'id' in response.body) templateId = String((response.body as any).id);
+        else if ('data' in response && response.data && typeof response.data === 'object' && 'id' in response.data) templateId = String((response.data as any).id);
+      }
       this.welcomeEmailTemplateId = templateId;
       console.log(`Created HubSpot email template with ID: ${templateId}`);
       return templateId;
@@ -198,6 +204,7 @@ export class HubSpotService {
         body: emailData
       });
 
+      // Patch: Use safe property access for response if needed
       console.log('HubSpot Email Send Response:', JSON.stringify(response, null, 2));
       console.log(`Welcome email sent via HubSpot to: ${email}`);
       return true;
@@ -207,6 +214,7 @@ export class HubSpotService {
       
       // Try alternative endpoint
       try {
+        const hubspotRequest = new Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
         const alternativeData = {
           from: "info@affluentedge.app",
           to: [email],

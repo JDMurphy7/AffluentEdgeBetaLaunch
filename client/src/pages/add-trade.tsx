@@ -75,10 +75,7 @@ export default function AddTrade() {
         status: tradeData.exitPrice ? "closed" : "open",
       };
       
-      return apiRequest(`/api/trades`, {
-        method: "POST",
-        body: JSON.stringify(formattedData),
-      });
+      return apiRequest("POST", `/api/trades`, formattedData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/trades/1`] });

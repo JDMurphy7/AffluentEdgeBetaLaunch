@@ -12,11 +12,16 @@ class CostReducer {
 
     public async reduceCosts(tradeData: any): Promise<number> {
         try {
-            const savings = await this.optimizerAgent.getCostSavings(tradeData);
+            // You must provide two arguments for OptimizerAgent.getCostSavings
+            // For demonstration, use dummy values (replace with real logic as needed)
+            const originalCost = tradeData.originalCost ?? 0;
+            const optimizedCost = tradeData.optimizedCost ?? 0;
+            const savings = await this.optimizerAgent.getCostSavings(originalCost, optimizedCost);
             return savings;
         } catch (error) {
             console.error('OptimizerAgent failed, falling back to LegacyAgent:', error);
-            return await this.legacyAgent.getCostSavings(tradeData);
+            // LegacyAgent.getCostSavings takes no arguments
+            return await this.legacyAgent.getCostSavings();
         }
     }
 }

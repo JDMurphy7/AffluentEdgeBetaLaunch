@@ -126,7 +126,13 @@ export const insertPortfolioSnapshotSchema = createInsertSchema(portfolioSnapsho
 
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type User = Omit<typeof users.$inferSelect, 'firstName' | 'lastName' | 'hubspotContactId' | 'resetToken' | 'resetExpires'> & {
+  firstName?: string | null;
+  lastName?: string | null;
+  hubspotContactId?: string | null;
+  resetToken?: string | null;
+  resetExpires?: string | null;
+};
 export type InsertStrategy = z.infer<typeof insertStrategySchema>;
 export type Strategy = typeof strategies.$inferSelect;
 export type InsertTrade = z.infer<typeof insertTradeSchema>;

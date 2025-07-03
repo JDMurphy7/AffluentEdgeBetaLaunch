@@ -6,8 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 interface User {
   id: number;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  firstName?: string | null;
+  lastName?: string | null;
   betaStatus: string;
   accountBalance: string;
 }

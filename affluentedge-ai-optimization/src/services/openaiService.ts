@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { Config } from '../config/index';
+import config from '../config/index';
 
 export class OpenAIService {
     private apiKey: string;
 
     constructor() {
-        this.apiKey = Config.openAI.apiKey;
+        this.apiKey = config.openAI?.apiKey ?? '';
     }
 
     public async analyzeTrade(tradeData: any): Promise<any> {
