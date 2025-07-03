@@ -757,14 +757,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: z.string().min(1, "First name is required").refine(val => val.trim().length > 0, "First name cannot be empty"),
         lastName: z.string().min(1, "Last name is required").refine(val => val.trim().length > 0, "Last name cannot be empty"),
         residency: z.string().min(1, "Country/region is required").refine(val => val.trim().length > 0, "Country/region cannot be empty"),
-        company: z.string().optional(),
-        tradingExperience: z.string().optional(),
-        assetClasses: z.array(z.string()).optional(),
-        source: z.string().optional()
+        password: z.string().min(6, "Password must be at least 6 characters"),
+        confirmPassword: z.string().min(6, "Password must be at least 6 characters")
+      }).refine((data) => data.password === data.confirmPassword, {
+        message: "Passwords do not match",
+        path: ["confirmPassword"]
       });
 
       const userData = betaRequestSchema.parse(req.body);
-      
+
       // Check if contact already exists
       const emailExists = await hubspotService.checkEmailExists(userData.email);
       if (emailExists) {
@@ -774,16 +775,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create contact in HubSpot with geographic tracking
+      // Create contact in HubSpot (do NOT send password)
       const contact = await hubspotService.createBetaContact(
         userData.email, 
         userData.firstName, 
         userData.lastName,
         userData.residency
       );
-      
-      console.log(`Beta access request registered: ${userData.email}`);
-      
+
+      // Hash password and store in app DB (pending approval)
+      const hashedPassword = await hashPassword(userData.password);
+      await storage.createUser({
+        email: userData.email,
+        password: hashedPassword,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        betaStatus: 'pending',
+        hubspotContactId: contact.id
+      });
+
+      // Send confirmation email (not credentials, just confirmation)
+      try {
+        await emailService.sendWelcomeEmail({
+          firstName: userData.firstName,
+          email: userData.email,
+          loginUrl: `${process.env.BASE_URL || 'https://affluentedge.app'}/auth`,
+          unsubscribeUrl: `${process.env.BASE_URL || 'https://affluentedge.app'}/unsubscribe`
+        });
+      } catch (emailErr) {
+        console.error('[BETA ACCESS] Failed to send confirmation email:', emailErr);
+      }
+
+      console.log(`[BETA ACCESS] Registered: ${userData.email}`);
+
       res.json({ 
         success: true, 
         message: "Beta access request received! We'll review your application and be in touch soon.",
@@ -795,7 +819,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (typeof err === 'object' && err && 'message' in err && typeof err.message === 'string' && err.message.includes('CRM')) {
         res.status(500).json({ error: "Registration system temporarily unavailable" });
       } else if (error instanceof z.ZodError) {
-        res.status(400).json({ error: "Invalid email address provided" });
+        res.status(400).json({ error: error.issues?.[0]?.message || "Invalid registration data" });
       } else {
         res.status(500).json({ error: "Failed to submit beta access request" });
       }
