@@ -35,6 +35,16 @@ type AuthContextType = {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
+// Demo user fallback
+const DEMO_USER = {
+  id: 1,
+  email: "demo@affluentedge.com",
+  firstName: "Demo",
+  lastName: "User",
+  betaStatus: "active",
+  accountBalance: "127450.00"
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   
@@ -109,10 +119,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const isDemoMode = typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard');
+
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
+        user: (user ?? (isDemoMode ? DEMO_USER : null)),
         isLoading,
         error,
         loginMutation,
