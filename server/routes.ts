@@ -452,9 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // First remove user from our database if they exist
       const user = await storage.getUserByEmail(email);
       if (user) {
-        // Note: In a production app, you might want to soft delete or archive user data
-        // For now, we'll just update their status
-        await storage.updateUserBetaStatus(user.id, 'deleted');
+        await storage.deleteUser(user.id); // Fully remove user from DB
       }
       
       // Update status in HubSpot to 'deleted'
