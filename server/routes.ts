@@ -127,11 +127,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user exists in our database
       const existingUser = await storage.getUserByEmail(email);
       if (!existingUser) {
+        console.warn(`[LOGIN] No user found for email: ${email}`);
         return res.status(401).json({ error: 'Invalid credentials' });
       }
       
       // Check beta status
       if (existingUser.betaStatus !== 'approved' && existingUser.betaStatus !== 'active') {
+        console.warn(`[LOGIN] User not approved: ${email}`);
         return res.status(403).json({ error: 'Beta access not approved' });
       }
       
@@ -142,9 +144,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         // If password comparison fails (old unhashed passwords), also check for default password
         isValidPassword = password === 'beta2025';
+        if (!isValidPassword) {
+          console.error(`[LOGIN] Password compare error for ${email}:`, error);
+        }
       }
       
       if (!isValidPassword) {
+        console.warn(`[LOGIN] Invalid password for: ${email}`);
         return res.status(401).json({ error: 'Invalid credentials' });
       }
       
@@ -168,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      console.error('Beta login error:', error instanceof Error ? error.message : error);
+      console.error('[LOGIN] Beta login error:', error instanceof Error ? error.message : error);
       res.status(500).json({ error: 'Login failed' });
     }
   });
@@ -318,68 +324,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // --- ADMIN APPROVAL: Approve beta user, hash password, update DB, send welcome email ---
   app.post("/api/admin/approve-user", requireSimpleAdmin, async (req, res) => {
     try {
       const { contactId, email, firstName, lastName } = req.body;
-      
       if (!contactId || !email) {
         return res.status(400).json({ error: "Contact ID and email required" });
       }
 
       // Update status in HubSpot
       await hubspotService.updateBetaStatus(contactId, 'approved');
-      
-      // Create user in our database for trading functionality
+
+      // Always generate a password (custom for Jamie, default for others)
+      const password = email === 'jamiedeanmurphy@gmail.com' ? '@Zeusyboy12' : 'beta2025';
+      const hashedPassword = await hashPassword(password);
+      let userId = null;
+      let userWasCreated = false;
+      let userWasUpdated = false;
       try {
         const existingUser = await storage.getUserByEmail(email);
-        
-        // Assign specific password for this user
-        const password = email === 'jamiedeanmurphy@gmail.com' ? '@Zeusyboy12' : 'beta2025';
-        const hashedPassword = await hashPassword(password);
-        
         if (!existingUser) {
+          // Create new user
           const newUser = await storage.createUser({
             email,
             password: hashedPassword,
             firstName: firstName || '',
             lastName: lastName || '',
             betaStatus: 'approved',
-            accountBalance: '25000.00', // Default starting balance
+            accountBalance: '25000.00',
             hubspotContactId: contactId
           });
-          console.log(`Created new user in database: ${email} (ID: ${newUser.id}) with ${email === 'jamiedeanmurphy@gmail.com' ? 'custom' : 'default'} password`);
+          userId = newUser.id;
+          userWasCreated = true;
+          console.log(`[APPROVE] Created new user: ${email} (ID: ${userId})`);
         } else {
-          // Update existing user
-          await storage.updateUserBetaStatus(existingUser.id, 'approved');
-          await storage.linkUserToHubSpot(existingUser.id, contactId);
-          // Update password if it's the specific user
-          if (email === 'jamiedeanmurphy@gmail.com') {
-            await storage.updateUser(existingUser.id, { password: hashedPassword });
-            console.log(`Updated password for ${email}`);
-          }
-          console.log(`Updated existing user: ${email} (ID: ${existingUser.id})`);
+          // Update existing user: always update password and status
+          await storage.updateUser(existingUser.id, {
+            password: hashedPassword,
+            betaStatus: 'approved',
+            hubspotContactId: contactId
+          });
+          userId = existingUser.id;
+          userWasUpdated = true;
+          console.log(`[APPROVE] Updated user: ${email} (ID: ${userId})`);
         }
       } catch (dbError) {
-        console.error("Failed to create/update user in database:", dbError);
-        // Continue with email sending even if database fails
+        console.error("[APPROVE] DB error:", dbError);
+        // Continue to email even if DB fails
       }
-      
-      // Send welcome email via HubSpot
-      const emailSent = await hubspotService.sendWelcomeEmail(contactId, email, firstName);
 
-      if (emailSent) {
-        console.log(`Welcome email sent to approved user: ${email}`);
-      } else {
-        console.error(`Failed to send welcome email to: ${email}`);
+      // Send welcome email with credentials (if possible)
+      let emailSent = false;
+      try {
+        // You may want to use a custom email template to include credentials
+        emailSent = await hubspotService.sendWelcomeEmail(contactId, email, firstName, password);
+        if (emailSent) {
+          console.log(`[APPROVE] Welcome email sent to: ${email}`);
+        } else {
+          console.error(`[APPROVE] Failed to send welcome email to: ${email}`);
+        }
+      } catch (emailErr) {
+        console.error(`[APPROVE] Welcome email error:`, emailErr);
       }
-      
-      res.json({ 
-        success: true, 
-        message: "User approved successfully, added to trading system, and welcome email sent",
-        emailSent 
+
+      res.json({
+        success: true,
+        message: `User ${userWasCreated ? 'created' : userWasUpdated ? 'updated' : 'processed'} and welcome email sent`,
+        emailSent,
+        userId
       });
     } catch (error) {
-      console.error("Failed to approve user:", error);
+      console.error("[APPROVE] Failed to approve user:", error);
       res.status(500).json({ error: "Failed to approve user" });
     }
   });

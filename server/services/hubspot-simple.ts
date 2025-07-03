@@ -176,10 +176,18 @@ export class HubSpotService {
     }
   }
 
-  async sendWelcomeEmail(contactId: string, email: string, firstName?: string): Promise<boolean> {
+  async sendWelcomeEmail(contactId: string, email: string, firstName?: string, password?: string): Promise<boolean> {
     try {
       const hubspotRequest = new Client({ accessToken: process.env.HUBSPOT_ACCESS_TOKEN });
-      
+      // Prepare email HTML, injecting password if provided
+      let htmlBody = this.getWelcomeEmailHTML()
+        .replace('{{contact.firstname}}', firstName || 'Trader')
+        .replace('{{contact.email}}', email);
+      if (password) {
+        htmlBody = htmlBody.replace('{{contact.password}}', password);
+      } else {
+        htmlBody = htmlBody.replace('{{contact.password}}', '[Set via password reset or provided separately]');
+      }
       // Use HubSpot's Single Send API for transactional emails
       const emailData = {
         emailId: "AffluentEdgeWelcome", // Use a custom email ID
@@ -187,7 +195,7 @@ export class HubSpotService {
           to: email,
           from: "info@affluentedge.app",
           subject: "Welcome to AffluentEdge Beta - Your AI Trading Journey Begins",
-          htmlBody: this.getWelcomeEmailHTML().replace('{{contact.firstname}}', firstName || 'Trader').replace('{{contact.email}}', email)
+          htmlBody
         },
         contactProperties: {
           email: email,
@@ -396,6 +404,15 @@ export class HubSpotService {
             <div class="paragraph" style="margin-top: 32px;">
                 Best regards,<br>
                 <strong>The AffluentEdge Team</strong>
+            </div>
+            
+            <div class="paragraph" style="background:rgba(249,224,134,0.08);border:1px solid #F9E086;padding:18px 20px;border-radius:8px;margin-bottom:24px;">
+                <strong>Your Beta Login Credentials:</strong><br>
+                <span style="display:inline-block;margin-top:8px;">
+                  <b>Email:</b> {{contact.email}}<br>
+                  <b>Password:</b> {{contact.password}}
+                </span>
+                <br><span style="font-size:13px;color:#F9E086;">(You can change your password after logging in.)</span>
             </div>
         </div>
         
