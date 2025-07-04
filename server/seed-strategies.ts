@@ -1,5 +1,13 @@
-import { db } from "./db";
-import { strategies } from "@shared/schema";
+import { db } from "./db.js";
+import Database from "better-sqlite3";
+const dbFile = process.env.DATABASE_URL?.replace('sqlite:', '') || './data/dev.db';
+const directDb = new Database(dbFile);
+console.log("[DEBUG] Direct better-sqlite3 DB file path:", directDb.name || "unknown");
+directDb.close();
+
+console.log("[DEBUG] DB file path:", (db as any).session?.client?.db?.name || (db as any).session?.client?.filename || "unknown");
+
+import { strategies } from "../shared/schema.js";
 import { eq } from "drizzle-orm";
 
 export const builtInStrategies = [
@@ -156,7 +164,15 @@ export async function seedStrategies() {
     console.log("Seeding built-in trading strategies...");
     
     for (const strategy of builtInStrategies) {
-      await db.insert(strategies).values(strategy);
+      await db.insert(strategies).values({
+        name: strategy.name,
+        description: strategy.description,
+        category: strategy.category,
+        isBuiltIn: true,
+        rules: strategy.rules,
+        createdBy: null,
+        createdAt: new Date()
+      });
     }
     
     console.log(`Successfully seeded ${builtInStrategies.length} built-in strategies`);

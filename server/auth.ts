@@ -4,10 +4,10 @@ import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { storage } from "./storage";
-import { User } from "@shared/schema";
-import createMemoryStore from "memorystore";
-import { hubspotService } from "./services/hubspot-simple";
+import { storage } from "./storage.js";
+import { User } from "../shared/schema.js";
+import { sessionStore } from "./redis-session.js";
+import { hubspotService } from "./services/hubspot-simple.js";
 
 declare global {
   namespace Express {
@@ -17,14 +17,13 @@ declare global {
       firstName?: string | null;
       lastName?: string | null;
       betaStatus: string;
-      accountBalance: string;
+      accountBalance: number;
       hubspotContactId?: string | null;
     }
   }
 }
 
 const scryptAsync = promisify(scrypt);
-const MemoryStore = createMemoryStore(session);
 
 export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -44,12 +43,13 @@ export function setupAuth(app: Express) {
     secret: process.env.SESSION_SECRET || "dev-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
-    store: new MemoryStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
-    }),
+    store: sessionStore,
     cookie: {
-      secure: false, // Set to true in production with HTTPS
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: 'strict',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      domain: process.env.COOKIE_DOMAIN || undefined
     }
   };
 
@@ -91,7 +91,7 @@ export function setupAuth(app: Express) {
             }
           }
 
-          return done(null, user);
+          return done(null, user as Express.User);
         } catch (error) {
           return done(error);
         }
@@ -99,11 +99,11 @@ export function setupAuth(app: Express) {
     )
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user: Express.User, done) => done(null, user.id));
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);
-      done(null, user);
+      done(null, user as unknown as Express.User);
     } catch (error) {
       done(error);
     }
@@ -147,7 +147,7 @@ export function setupAuth(app: Express) {
       });
 
       // Automatically log in the user
-      req.login(user, (err) => {
+      req.login(user as unknown as Express.User, (err) => {
         if (err) return next(err);
         res.status(201).json({
           success: true,
@@ -210,7 +210,7 @@ export function setupAuth(app: Express) {
       return res.status(401).json({ error: "Not authenticated" });
     }
     
-    const user = req.user as User;
+    const user = req.user as Express.User;
     res.json({
       id: user.id,
       email: user.email,
@@ -244,4 +244,12 @@ export function requireActiveBeta(req: any, res: any, next: any) {
   }
   
   next();
+}
+
+// Helper to extract user from session/cookie for socket.io
+export async function getUserFromSession(req: any): Promise<User | null> {
+  if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+    return req.user as User;
+  }
+  return null;
 }

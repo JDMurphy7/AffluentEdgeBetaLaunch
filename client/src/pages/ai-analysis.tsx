@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "../components/ui/button.js";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
+import { Badge } from "../components/ui/badge.js";
+import { Progress } from "../components/ui/progress.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs.js";
 import { Link } from "wouter";
-import { Trade, StrategyPerformance } from "@/lib/types";
+import { Trade, StrategyPerformance } from "../lib/types.js";
 import affluentEdgeLogo from "@assets/Affluent Edge (2)_1751360237178.png";
 
 export default function AIAnalysis() {

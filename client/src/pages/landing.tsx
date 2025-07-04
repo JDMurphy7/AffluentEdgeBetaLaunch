@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "../components/ui/button.js";
+import { Input } from "../components/ui/input.js";
+import { useToast } from "../hooks/use-toast.js";
 import { Link } from "wouter";
 import affluentEdgeLogo from "@assets/Affluent Edge (2)_1751360237178.png";
 

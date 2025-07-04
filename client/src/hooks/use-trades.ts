@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import type { Trade } from "@/lib/types";
+import { apiRequest } from "../lib/queryClient.js";
+import type { Trade } from "../lib/types.js";
 
 export function useTrades(userId: number, limit?: number) {
   return useQuery({

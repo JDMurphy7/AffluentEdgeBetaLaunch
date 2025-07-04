@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "../components/ui/button.js";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
+import { Input } from "../components/ui/input.js";
+import { useToast } from "../hooks/use-toast.js";
 import affluentEdgeLogo from "@assets/image_1751456311338.png";
 
 export default function ResetPassword() {

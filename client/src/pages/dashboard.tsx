@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import Navbar from "@/components/layout/navbar";
-import Sidebar from "@/components/layout/sidebar";
-import PerformanceCards from "@/components/dashboard/performance-cards";
-import EquityChart from "@/components/dashboard/equity-chart";
-import RecentTrades from "@/components/dashboard/recent-trades";
-import StrategyPerformance from "@/components/dashboard/strategy-performance";
-import TradeInput from "@/components/dashboard/trade-input";
-import AIAnalysis from "@/components/dashboard/ai-analysis";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "../hooks/use-auth.js";
+import Navbar from "../components/layout/navbar.js";
+import Sidebar from "../components/layout/sidebar.js";
+import PerformanceCards from "../components/dashboard/performance-cards.js";
+import EquityChart from "../components/dashboard/equity-chart.js";
+import RecentTrades from "../components/dashboard/recent-trades.js";
+import StrategyPerformance from "../components/dashboard/strategy-performance.js";
+import TradeInput from "../components/dashboard/trade-input.js";
+import AIAnalysis from "../components/dashboard/ai-analysis.js";
+import { Button } from "../components/ui/button.js";
 import { Link } from "wouter";
 import { AlertCircle } from "lucide-react";
+import ConnectionStatus from "../components/ui/connection-status.js";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -64,6 +65,7 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
+              <ConnectionStatus />
               <button className="glass-morphism px-4 py-2 rounded-lg hover:bg-white/20 transition-colors">
                 <i className="fas fa-download mr-2"></i>Export
               </button>

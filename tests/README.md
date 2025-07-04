@@ -50,6 +50,47 @@ This directory contains the comprehensive automated test suite for the AffluentE
 - Test data is seeded and cleaned up using setup/teardown hooks in each suite.
 - E2E tests use Playwright fixtures for user and trade creation.
 
+## Test Database Setup
+
+The test database is a SQLite database located at `data/test.db`. It is used for integration tests to ensure that the application works correctly with a real database.
+
+### Schema
+
+The test database schema is defined in `tests/setup-sql-test-db.ts`. This file creates tables with column names that match the Drizzle ORM schema defined in `shared/schema.ts`.
+
+Important note: The Drizzle ORM uses snake_case for column names in the database, but camelCase for JavaScript property names. For example, `userId` in JavaScript corresponds to `user_id` in the database.
+
+### Tables
+
+The main tables in the test database are:
+
+1. `users` - User accounts
+2. `strategies` - Trading strategies
+3. `trades` - Trading history
+4. `portfolio_snapshots` - Historical portfolio performance
+
+### Test Data
+
+The test database includes a demo user with the following credentials:
+- Email: demo@affluentedge.com
+- Password: demo123
+
+### Recreating the Test Database
+
+To recreate the test database from scratch, you can run:
+
+```bash
+rm -f data/test.db && npx tsx tests/setup-sql-test-db.ts
+```
+
+### Running Tests with the Test Database
+
+Integration tests that use the test database should set the `NODE_ENV` environment variable to 'test':
+
+```bash
+NODE_ENV=test npx vitest run tests/integration/broker-import.test.ts
+```
+
 ## Performance Benchmarks
 - Performance tests measure cache hit rates, response times, and memory usage.
 - Compare results to baseline metrics after each deployment.

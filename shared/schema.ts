@@ -1,65 +1,65 @@
-import { pgTable, text, serial, integer, boolean, decimal, timestamp, varchar, jsonb, index } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, real, blob } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  accountBalance: decimal("account_balance", { precision: 15, scale: 2 }).notNull().default('100000.00'),
-  customBalance: boolean("custom_balance").notNull().default(false),
-  betaStatus: varchar("beta_status").notNull().default('pending'), // pending, approved, active, inactive
-  hubspotContactId: varchar("hubspot_contact_id"), // Link to HubSpot contact
-  resetToken: varchar("reset_token"), // Password reset token
-  resetExpires: varchar("reset_expires"), // Reset token expiration
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  accountBalance: real("account_balance").notNull().default(100000.00),
+  customBalance: integer("custom_balance", { mode: "boolean" }).notNull().default(false),
+  betaStatus: text("beta_status").notNull().default('pending'), // pending, approved, active, inactive
+  hubspotContactId: text("hubspot_contact_id"), // Link to HubSpot contact
+  resetToken: text("reset_token"), // Password reset token
+  resetExpires: text("reset_expires"), // Reset token expiration
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(new Date()),
 });
 
-export const strategies = pgTable("strategies", {
-  id: serial("id").primaryKey(),
+export const strategies = sqliteTable("strategies", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   description: text("description"),
-  rules: jsonb("rules").notNull(), // JSON object containing strategy rules
+  rules: blob("rules", { mode: "json" }).notNull(), // JSON object containing strategy rules
   category: text("category").notNull(), // "trend_following", "ict_concepts", "support_resistance", "scalping"
-  isBuiltIn: boolean("is_built_in").notNull().default(false),
+  isBuiltIn: integer("is_built_in", { mode: "boolean" }).notNull().default(false),
   createdBy: integer("created_by"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(new Date()),
 });
 
-export const trades = pgTable("trades", {
-  id: serial("id").primaryKey(),
+export const trades = sqliteTable("trades", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   strategyId: integer("strategy_id"),
   symbol: text("symbol").notNull(), // EUR/USD, BTC/USD, GOLD, etc.
   assetClass: text("asset_class").notNull(), // forex, crypto, commodities, stocks, indices
   direction: text("direction").notNull(), // long, short
-  entryPrice: decimal("entry_price", { precision: 15, scale: 8 }).notNull(),
-  exitPrice: decimal("exit_price", { precision: 15, scale: 8 }),
-  stopLoss: decimal("stop_loss", { precision: 15, scale: 8 }),
-  takeProfit: decimal("take_profit", { precision: 15, scale: 8 }),
-  quantity: decimal("quantity", { precision: 15, scale: 4 }).notNull(),
-  pnl: decimal("pnl", { precision: 15, scale: 2 }),
+  entryPrice: real("entry_price").notNull(),
+  exitPrice: real("exit_price"),
+  stopLoss: real("stop_loss"),
+  takeProfit: real("take_profit"),
+  quantity: real("quantity").notNull(),
+  pnl: real("pnl"),
   status: text("status").notNull().default('open'), // open, closed, cancelled
   aiGrade: text("ai_grade"), // A, B, C, D, F
-  aiAnalysis: jsonb("ai_analysis"), // JSON object with AI feedback
+  aiAnalysis: blob("ai_analysis", { mode: "json" }), // JSON object with AI feedback
   strategyAdherence: integer("strategy_adherence"), // 0-100 percentage
   riskManagementScore: text("risk_management_score"), // A, B, C, D, F
   notes: text("notes"),
-  entryTime: timestamp("entry_time").notNull(),
-  exitTime: timestamp("exit_time"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  entryTime: integer("entry_time", { mode: "timestamp" }).notNull(),
+  exitTime: integer("exit_time", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().default(new Date()),
 });
 
-export const portfolioSnapshots = pgTable("portfolio_snapshots", {
-  id: serial("id").primaryKey(),
+export const portfolioSnapshots = sqliteTable("portfolio_snapshots", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
-  balance: decimal("balance", { precision: 15, scale: 2 }).notNull(),
-  equity: decimal("equity", { precision: 15, scale: 2 }).notNull(),
-  drawdown: decimal("drawdown", { precision: 15, scale: 2 }).notNull().default('0'),
-  snapshotTime: timestamp("snapshot_time").defaultNow().notNull(),
+  balance: real("balance").notNull(),
+  equity: real("equity").notNull(),
+  drawdown: real("drawdown").notNull().default(0),
+  snapshotTime: integer("snapshot_time", { mode: "timestamp" }).notNull().default(new Date()),
 });
 
 // Relations
@@ -139,3 +139,6 @@ export type InsertTrade = z.infer<typeof insertTradeSchema>;
 export type Trade = typeof trades.$inferSelect;
 export type InsertPortfolioSnapshot = z.infer<typeof insertPortfolioSnapshotSchema>;
 export type PortfolioSnapshot = typeof portfolioSnapshots.$inferSelect;
+
+// For future: Partitioning by month for large datasets (Postgres native partitioning)
+// Example: PARTITION BY RANGE (entry_time)

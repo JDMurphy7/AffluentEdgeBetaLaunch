@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
+import { Input } from "../components/ui/input.js";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Button } from "../components/ui/button.js";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
+import { Badge } from "../components/ui/badge.js";
+import { useToast } from "../hooks/use-toast.js";
+import { apiRequest, queryClient } from "../lib/queryClient.js";
 import { format } from "date-fns";
 import { CheckCircle, XCircle, Clock, User, MapPin, Mail, Trash2, Shield, Eye, EyeOff, Key } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { isUnauthorizedError } from "@/lib/authUtils";
+import { useAuth } from "../hooks/use-auth.js";
+import { isUnauthorizedError } from "../lib/authUtils.js";
 
 interface BetaApplicant {
   id: string;

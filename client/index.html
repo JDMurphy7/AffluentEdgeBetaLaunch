@@ -6,11 +6,31 @@
     <title>AffluentEdge - Elite Trading Journal & Analytics</title>
     <meta name="description" content="Professional-grade trading journal with AI-powered analysis, FTMO-style tracking, and strategy validation for serious traders. Join our exclusive beta.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#FFD700">
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
+    <meta name="apple-mobile-web-app-title" content="AffluentEdge">
+    <meta name="application-name" content="AffluentEdge">
+    <meta name="msapplication-TileColor" content="#FFD700">
+    <meta name="msapplication-TileImage" content="/icon-192.png">
+    <link rel="apple-touch-startup-image" href="/icon-512.png">
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js');
+        });
+      }
+    </script>
   </body>
 </html>

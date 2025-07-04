@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { connectRealtime, subscribePortfolioUpdates, disconnectRealtime } from "../../lib/realtime.js";
 
 interface RecentTradesProps {
   userId: number;
@@ -8,6 +10,19 @@ export default function RecentTrades({ userId }: RecentTradesProps) {
   const { data: trades, isLoading } = useQuery<any[]>({
     queryKey: [`/api/trades/${userId}`],
   });
+  const [realtimeTrades, setRealtimeTrades] = useState<any[] | undefined>(undefined);
+
+  useEffect(() => {
+    const socket = connectRealtime();
+    subscribePortfolioUpdates(userId, (data) => {
+      if (data.trades) setRealtimeTrades(data.trades);
+    });
+    return () => {
+      disconnectRealtime();
+    };
+  }, [userId]);
+
+  const displayTrades = realtimeTrades || trades;
 
   const getAssetIcon = (assetClass: string, symbol: string) => {
     switch (assetClass) {
@@ -57,7 +72,7 @@ export default function RecentTrades({ userId }: RecentTradesProps) {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !displayTrades) {
     return (
       <div className="glass-morphism p-6 rounded-xl">
         <div className="flex items-center justify-between mb-6">
@@ -84,7 +99,7 @@ export default function RecentTrades({ userId }: RecentTradesProps) {
   }
 
   // Ensure trades is an array before using slice
-  const recentTrades = Array.isArray(trades) ? trades.slice(0, 5) : [];
+  const recentTrades = Array.isArray(displayTrades) ? displayTrades.slice(0, 5) : [];
 
   // Demo data for when no trades are available
   const demoTrades = [

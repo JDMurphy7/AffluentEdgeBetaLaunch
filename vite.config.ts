@@ -2,10 +2,21 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { pathAlias } from "./vite.config.pathalias.js";
 
 export default defineConfig(async () => {
   const plugins = [
-    react(),
+    react({
+      // Add JSX runtime automatic for React 17+
+      jsxRuntime: 'automatic',
+      // Babel configuration for JSX
+      babel: {
+        plugins: [
+          ['@babel/plugin-transform-react-jsx', { runtime: 'automatic' }]
+        ]
+      }
+    }),
+    pathAlias(),
     runtimeErrorOverlay(),
   ];
 

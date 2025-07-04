@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext } from "react";
 import { useQuery, useMutation, UseMutationResult } from "@tanstack/react-query";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { getQueryFn, apiRequest, queryClient } from '../lib/queryClient.js';
+import { useToast } from "./use-toast.js";
 
 interface User {
   id: number;
@@ -31,6 +31,8 @@ type AuthContextType = {
   loginMutation: UseMutationResult<User, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<User, Error, RegisterData>;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -130,6 +132,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginMutation,
         logoutMutation,
         registerMutation,
+        isAuthenticated: !!user,
+        isAdmin: !!user && user.email.endsWith("@affluentedge.com"),
       }}
     >
       {children}

@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "../components/ui/button.js";
+import { Input } from "../components/ui/input.js";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
+import { Badge } from "../components/ui/badge.js";
+import { useToast } from "../hooks/use-toast.js";
 import { Link } from "wouter";
-import { User, Trade } from "@/lib/types";
+import { User, Trade } from "../lib/types.js";
 import { format } from "date-fns";
 import affluentEdgeLogo from "@assets/Affluent Edge (2)_1751360237178.png";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "../lib/queryClient.js";
 
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
@@ -107,36 +107,36 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-charcoal">
       {/* Navigation */}
-      <nav className="glass-morphism border-b border-white/10 p-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <nav className="glass-morphism border-b border-white/10 p-2 sm:p-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
           <div className="flex items-center space-x-4">
             <Link href="/dashboard" className="flex items-center space-x-2 text-white hover:text-gold transition-colors">
               <i className="fas fa-arrow-left"></i>
               <span>Back to Dashboard</span>
             </Link>
-            <div className="w-px h-6 bg-white/20"></div>
+            <div className="w-px h-6 bg-white/20 hidden sm:block"></div>
             <div className="flex items-center space-x-3">
               <img src={affluentEdgeLogo} alt="AffluentEdge" className="h-8 w-auto" />
               <span className="text-xl font-bold text-white">AffluentEdge</span>
             </div>
           </div>
-          <div className="text-white/60 text-sm">
+          <div className="text-white/60 text-sm mt-2 sm:mt-0">
             Profile Management
           </div>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-2 sm:p-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Profile</h1>
-          <p className="text-white/70 text-lg">Manage your account settings and view your trading statistics</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">Profile</h1>
+          <p className="text-white/70 text-base sm:text-lg">Manage your account settings and view your trading statistics</p>
         </div>
 
         {userLoading ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="glass-morphism p-6 rounded-xl animate-pulse">
+              <div key={i} className="glass-morphism p-4 sm:p-6 rounded-xl animate-pulse">
                 <div className="h-6 bg-gray-600 rounded w-3/4 mb-4"></div>
                 <div className="h-4 bg-gray-600 rounded w-full mb-2"></div>
                 <div className="h-4 bg-gray-600 rounded w-2/3"></div>
@@ -144,11 +144,11 @@ export default function Profile() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Profile Information */}
             <div className="lg:col-span-2">
               <Card className="glass-morphism border-white/10">
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
                   <CardTitle className="text-white flex items-center">
                     <i className="fas fa-user text-gold mr-2"></i>
                     Account Information
@@ -158,15 +158,15 @@ export default function Profile() {
                       variant="outline" 
                       size="sm"
                       onClick={handleEdit}
-                      className="border-gold/30 text-gold hover:bg-gold/10"
+                      className="border-gold/30 text-gold hover:bg-gold/10 mt-2 sm:mt-0"
                     >
                       <i className="fas fa-edit mr-2"></i>
                       Edit
                     </Button>
                   )}
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center space-x-6">
+                <CardContent className="space-y-4 sm:space-y-6">
+                  <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
                     <div className="w-20 h-20 bg-gold/20 rounded-full flex items-center justify-center">
                       <i className="fas fa-user text-gold text-2xl"></i>
                     </div>

@@ -1,5 +1,6 @@
-import { db } from "./db";
-import { users, portfolioSnapshots, trades } from "@shared/schema";
+import { db } from "./db.js";
+import { users } from "../shared/schema.js";
+import { portfolioSnapshots, trades } from "../shared/schema.js";
 import { eq } from "drizzle-orm";
 
 export async function seedDemoUser() {
@@ -20,25 +21,25 @@ export async function seedDemoUser() {
       password: 'demo123', // In production, this would be hashed
       firstName: 'Demo',
       lastName: 'User',
-      accountBalance: '127450.00',
+      accountBalance: 127450.00,
       customBalance: false,
       betaStatus: 'active'
     }).returning();
 
     // Create sample portfolio snapshots for equity curve (last 12 months)
     const snapshots = [
-      { balance: '100000.00', equity: '100000.00', drawdown: '0.00', days: 330 },
-      { balance: '105000.00', equity: '104800.00', drawdown: '0.19', days: 300 },
-      { balance: '102000.00', equity: '101900.00', drawdown: '2.86', days: 270 },
-      { balance: '108000.00', equity: '107850.00', drawdown: '0.14', days: 240 },
-      { balance: '115000.00', equity: '114750.00', drawdown: '0.22', days: 210 },
-      { balance: '112000.00', equity: '111800.00', drawdown: '2.78', days: 180 },
-      { balance: '118000.00', equity: '117900.00', drawdown: '0.08', days: 150 },
-      { balance: '125000.00', equity: '124800.00', drawdown: '0.16', days: 120 },
-      { balance: '120000.00', equity: '119850.00', drawdown: '4.12', days: 90 },
-      { balance: '127000.00', equity: '126900.00', drawdown: '0.08', days: 60 },
-      { balance: '124000.00', equity: '123800.00', drawdown: '2.44', days: 30 },
-      { balance: '127450.00', equity: '127450.00', drawdown: '0.00', days: 0 }
+      { balance: 100000.00, equity: 100000.00, drawdown: 0.00, days: 330 },
+      { balance: 105000.00, equity: 104800.00, drawdown: 0.19, days: 300 },
+      { balance: 102000.00, equity: 101900.00, drawdown: 2.86, days: 270 },
+      { balance: 108000.00, equity: 107850.00, drawdown: 0.14, days: 240 },
+      { balance: 115000.00, equity: 114750.00, drawdown: 0.22, days: 210 },
+      { balance: 112000.00, equity: 111800.00, drawdown: 2.78, days: 180 },
+      { balance: 118000.00, equity: 117900.00, drawdown: 0.08, days: 150 },
+      { balance: 125000.00, equity: 124800.00, drawdown: 0.16, days: 120 },
+      { balance: 120000.00, equity: 119850.00, drawdown: 4.12, days: 90 },
+      { balance: 127000.00, equity: 126900.00, drawdown: 0.08, days: 60 },
+      { balance: 124000.00, equity: 123800.00, drawdown: 2.44, days: 30 },
+      { balance: 127450.00, equity: 127450.00, drawdown: 0.00, days: 0 }
     ];
 
     for (const snapshot of snapshots) {
@@ -60,12 +61,12 @@ export async function seedDemoUser() {
         symbol: 'EUR/USD',
         assetClass: 'forex',
         direction: 'long',
-        entryPrice: '1.0850',
-        exitPrice: '1.0920',
-        stopLoss: '1.0800',
-        takeProfit: '1.0920',
-        quantity: '100000',
-        pnl: '700.00',
+        entryPrice: 1.0850,
+        exitPrice: 1.0920,
+        stopLoss: 1.0800,
+        takeProfit: 1.0920,
+        quantity: 100000,
+        pnl: 700.00,
         status: 'closed',
         aiGrade: 'A',
         aiAnalysis: {
@@ -78,18 +79,18 @@ export async function seedDemoUser() {
         strategyAdherence: 95,
         riskManagementScore: 'A',
         notes: 'Clean trend following trade on EUR/USD',
-        days: 5
+        days: 30
       },
       {
         symbol: 'GBP/JPY',
         assetClass: 'forex',
         direction: 'short',
-        entryPrice: '185.50',
-        exitPrice: '183.20',
-        stopLoss: '186.50',
-        takeProfit: '183.00',
-        quantity: '50000',
-        pnl: '1150.00',
+        entryPrice: 185.50,
+        exitPrice: 183.20,
+        stopLoss: 186.50,
+        takeProfit: 183.00,
+        quantity: 50000,
+        pnl: 1150.00,
         status: 'closed',
         aiGrade: 'A',
         aiAnalysis: {
@@ -108,12 +109,12 @@ export async function seedDemoUser() {
         symbol: 'BTC/USD',
         assetClass: 'crypto',
         direction: 'long',
-        entryPrice: '42500.00',
-        exitPrice: '45200.00',
-        stopLoss: '41500.00',
-        takeProfit: '45000.00',
-        quantity: '0.25',
-        pnl: '675.00',
+        entryPrice: 42500.00,
+        exitPrice: 45200.00,
+        stopLoss: 41500.00,
+        takeProfit: 45000.00,
+        quantity: 0.25,
+        pnl: 675.00,
         status: 'closed',
         aiGrade: 'B',
         aiAnalysis: {
@@ -132,12 +133,12 @@ export async function seedDemoUser() {
         symbol: 'GOLD',
         assetClass: 'commodities',
         direction: 'long',
-        entryPrice: '2045.50',
-        exitPrice: '2038.20',
-        stopLoss: '2040.00',
-        takeProfit: '2055.00',
-        quantity: '10',
-        pnl: '-73.00',
+        entryPrice: 2045.50,
+        exitPrice: 2038.20,
+        stopLoss: 2040.00,
+        takeProfit: 2055.00,
+        quantity: 10,
+        pnl: -73.00,
         status: 'closed',
         aiGrade: 'C',
         aiAnalysis: {

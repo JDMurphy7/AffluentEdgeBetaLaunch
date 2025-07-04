@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "../components/ui/button.js";
+import { Input } from "../components/ui/input.js";
+import { Badge } from "../components/ui/badge.js";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select.js";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
 import { Link } from "wouter";
-import { Trade } from "@/lib/types";
+import { Trade } from "../lib/types.js";
 import { format } from "date-fns";
 import affluentEdgeLogo from "@assets/Affluent Edge (2)_1751360237178.png";
 

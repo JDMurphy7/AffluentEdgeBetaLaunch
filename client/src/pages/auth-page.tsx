@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "../components/ui/button.js";
+import { Input } from "../components/ui/input.js";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs.js";
+import { useToast } from "../hooks/use-toast.js";
 import { Link, useLocation } from "wouter";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "../lib/queryClient.js";
 import affluentEdgeLogo from "@assets/Affluent Edge (2)_1751360237178.png";
 
 // Forgot Password Component

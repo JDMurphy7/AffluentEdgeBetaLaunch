@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { PortfolioMetrics } from "@/lib/types";
+import { useEffect, useState } from "react";
+import { PortfolioMetrics } from "../../lib/types.js";
+import { connectRealtime, subscribePortfolioUpdates, disconnectRealtime } from "../../lib/realtime.js";
 
 interface PerformanceCardsProps {
   userId: number;
@@ -9,8 +11,21 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
   const { data: metrics, isLoading } = useQuery<PortfolioMetrics>({
     queryKey: [`/api/portfolio/${userId}/metrics`],
   });
+  const [realtimeMetrics, setRealtimeMetrics] = useState<PortfolioMetrics | undefined>(undefined);
 
-  if (isLoading) {
+  useEffect(() => {
+    const socket = connectRealtime();
+    subscribePortfolioUpdates(userId, (data) => {
+      setRealtimeMetrics((prev) => ({ ...prev, ...data }));
+    });
+    return () => {
+      disconnectRealtime();
+    };
+  }, [userId]);
+
+  const displayMetrics = realtimeMetrics || metrics;
+
+  if (isLoading && !displayMetrics) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
@@ -39,13 +54,13 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
           </div>
           <div className="text-right">
             <span className="text-sm text-gold block">
-              {metrics?.winRate ? formatPercentage(metrics.winRate - 70) : '+8.2%'}
+              {displayMetrics?.winRate ? formatPercentage(displayMetrics.winRate - 70) : '+8.2%'}
             </span>
             <span className="text-xs text-muted-foreground">vs last month</span>
           </div>
         </div>
         <h3 className="text-2xl font-bold text-white">
-          {metrics?.winRate ? formatPercentage(metrics.winRate) : '87.3%'}
+          {displayMetrics?.winRate ? formatPercentage(displayMetrics.winRate) : '87.3%'}
         </h3>
         <p className="text-sm text-muted-foreground">Win Rate</p>
       </div>
@@ -57,13 +72,13 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
           </div>
           <div className="text-right">
             <span className="text-sm text-bronze block">
-              {metrics?.profitFactor ? `+${formatPercentage((metrics.profitFactor - 1) * 50)}` : '+15.4%'}
+              {displayMetrics?.profitFactor ? `+${formatPercentage((displayMetrics.profitFactor - 1) * 50)}` : '+15.4%'}
             </span>
             <span className="text-xs text-muted-foreground">vs last month</span>
           </div>
         </div>
         <h3 className="text-2xl font-bold text-white">
-          {metrics?.profitFactor ? formatNumber(metrics.profitFactor, 1) : '2.4'}
+          {displayMetrics?.profitFactor ? formatNumber(displayMetrics.profitFactor, 1) : '2.4'}
         </h3>
         <p className="text-sm text-muted-foreground">Profit Factor</p>
       </div>
@@ -75,13 +90,13 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
           </div>
           <div className="text-right">
             <span className="text-sm text-gold block">
-              {metrics?.sharpeRatio ? `+${formatPercentage(metrics.sharpeRatio * 10)}` : '+2.1%'}
+              {displayMetrics?.sharpeRatio ? `+${formatPercentage(displayMetrics.sharpeRatio * 10)}` : '+2.1%'}
             </span>
             <span className="text-xs text-muted-foreground">vs last month</span>
           </div>
         </div>
         <h3 className="text-2xl font-bold text-white">
-          {metrics?.sharpeRatio ? formatNumber(metrics.sharpeRatio, 2) : '1.67'}
+          {displayMetrics?.sharpeRatio ? formatNumber(displayMetrics.sharpeRatio, 2) : '1.67'}
         </h3>
         <p className="text-sm text-muted-foreground">Sharpe Ratio</p>
       </div>
@@ -93,13 +108,13 @@ export default function PerformanceCards({ userId }: PerformanceCardsProps) {
           </div>
           <div className="text-right">
             <span className="text-sm text-destructive block">
-              {metrics?.maxDrawdown ? formatPercentage(metrics.maxDrawdown - 10) : '-2.3%'}
+              {displayMetrics?.maxDrawdown ? formatPercentage(displayMetrics.maxDrawdown - 10) : '-2.3%'}
             </span>
             <span className="text-xs text-muted-foreground">vs last month</span>
           </div>
         </div>
         <h3 className="text-2xl font-bold text-white">
-          {metrics?.maxDrawdown ? formatPercentage(metrics.maxDrawdown) : '8.5%'}
+          {displayMetrics?.maxDrawdown ? formatPercentage(displayMetrics.maxDrawdown) : '8.5%'}
         </h3>
         <p className="text-sm text-muted-foreground">Max Drawdown</p>
       </div>

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "../components/ui/button.js";
+import { Input } from "../components/ui/input.js";
+import { Badge } from "../components/ui/badge.js";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card.js";
+import { Progress } from "../components/ui/progress.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs.js";
 import { Link } from "wouter";
-import { Strategy, StrategyPerformance } from "@/lib/types";
+import { Strategy, StrategyPerformance } from "../lib/types.js";
 import affluentEdgeLogo from "@assets/Affluent Edge (2)_1751360237178.png";
 
 export default function Strategies() {

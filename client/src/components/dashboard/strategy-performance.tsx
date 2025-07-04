@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { connectRealtime, subscribePortfolioUpdates, disconnectRealtime } from "../../lib/realtime.js";
 
 interface StrategyPerformanceProps {
   userId: number;
@@ -8,6 +10,17 @@ export default function StrategyPerformance({ userId }: StrategyPerformanceProps
   const { data: strategies, isLoading } = useQuery<any[]>({
     queryKey: [`/api/strategies/${userId}/performance`],
   });
+  const [realtimeStrategies, setRealtimeStrategies] = useState<any[] | undefined>(undefined);
+
+  useEffect(() => {
+    const socket = connectRealtime();
+    subscribePortfolioUpdates(userId, (data) => {
+      if (data.strategies) setRealtimeStrategies(data.strategies);
+    });
+    return () => {
+      disconnectRealtime();
+    };
+  }, [userId]);
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
@@ -43,7 +56,9 @@ export default function StrategyPerformance({ userId }: StrategyPerformanceProps
     }
   };
 
-  if (isLoading) {
+  const displayStrategies = realtimeStrategies || strategies;
+
+  if (isLoading && !displayStrategies) {
     return (
       <div className="glass-morphism p-6 rounded-xl">
         <div className="flex items-center justify-between mb-6">
@@ -96,7 +111,7 @@ export default function StrategyPerformance({ userId }: StrategyPerformanceProps
     }
   ];
 
-  const displayStrategies = Array.isArray(strategies) && strategies.length > 0 ? strategies : defaultStrategies;
+  const finalStrategies = Array.isArray(displayStrategies) && displayStrategies.length > 0 ? displayStrategies : defaultStrategies;
 
   return (
     <div className="glass-morphism p-6 rounded-xl">
@@ -105,7 +120,7 @@ export default function StrategyPerformance({ userId }: StrategyPerformanceProps
         <button className="text-gold hover:text-bronze transition-colors text-sm">Manage</button>
       </div>
       <div className="space-y-4">
-        {displayStrategies.map((strategyData: any) => (
+        {finalStrategies.map((strategyData: any) => (
           <div key={strategyData.strategy.id} className="p-4 bg-white/5 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-medium text-white">{strategyData.strategy.name}</h3>

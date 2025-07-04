@@ -11,8 +11,8 @@ import {
   type InsertTrade,
   type PortfolioSnapshot,
   type InsertPortfolioSnapshot
-} from "@shared/schema";
-import { db } from "./db";
+} from "../shared/schema.js";
+import { db } from "./db.js";
 import { eq, desc, and, gte, lte, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
@@ -21,7 +21,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User>;
   updateUser(userId: number, updates: Partial<User>): Promise<User>;
-  updateUserBalance(userId: number, balance: string): Promise<void>;
+  updateUserBalance(userId: number, balance: number): Promise<void>;
   updateUserBetaStatus(userId: number, status: string): Promise<void>;
   linkUserToHubSpot(userId: number, hubspotContactId: string): Promise<void>;
   // Replit Auth methods
@@ -97,7 +97,7 @@ export class DatabaseStorage implements IStorage {
     return updatedUser;
   }
 
-  async updateUserBalance(userId: number, balance: string): Promise<void> {
+  async updateUserBalance(userId: number, balance: number): Promise<void> {
     await db
       .update(users)
       .set({ 
@@ -143,9 +143,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createStrategy(strategy: InsertStrategy): Promise<Strategy> {
+    const { name, description, category, isBuiltIn, rules, createdBy } = strategy;
     const [newStrategy] = await db
       .insert(strategies)
-      .values(strategy)
+      .values({
+        name,
+        description,
+        category,
+        isBuiltIn: isBuiltIn ?? false,
+        rules,
+        createdBy: createdBy ?? null,
+        createdAt: new Date()
+      })
       .returning();
     return newStrategy;
   }
@@ -239,14 +248,12 @@ export class DatabaseStorage implements IStorage {
       };
     }
 
-    const winningTrades = userTrades.filter(trade => parseFloat(trade.pnl || '0') > 0);
-    const losingTrades = userTrades.filter(trade => parseFloat(trade.pnl || '0') < 0);
-    
+    const winningTrades = userTrades.filter((trade: Trade) => (trade.pnl ?? 0) > 0);
+    const losingTrades = userTrades.filter((trade: Trade) => (trade.pnl ?? 0) < 0);
     const winRate = (winningTrades.length / totalTrades) * 100;
-    const totalPnL = userTrades.reduce((sum, trade) => sum + parseFloat(trade.pnl || '0'), 0);
-    
-    const grossProfit = winningTrades.reduce((sum, trade) => sum + parseFloat(trade.pnl || '0'), 0);
-    const grossLoss = Math.abs(losingTrades.reduce((sum, trade) => sum + parseFloat(trade.pnl || '0'), 0));
+    const totalPnL = userTrades.reduce((sum: number, trade: Trade) => sum + (trade.pnl ?? 0), 0);
+    const grossProfit = winningTrades.reduce((sum: number, trade: Trade) => sum + (trade.pnl ?? 0), 0);
+    const grossLoss = Math.abs(losingTrades.reduce((sum: number, trade: Trade) => sum + (trade.pnl ?? 0), 0));
     const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? grossProfit : 0;
 
     // Calculate max drawdown from portfolio snapshots
@@ -255,16 +262,16 @@ export class DatabaseStorage implements IStorage {
     let peak = 0;
     
     for (const snapshot of snapshots.reverse()) {
-      const balance = parseFloat(snapshot.balance);
+      const balance = snapshot.balance;
       if (balance > peak) peak = balance;
       const drawdown = ((peak - balance) / peak) * 100;
       if (drawdown > maxDrawdown) maxDrawdown = drawdown;
     }
 
     // Simple Sharpe ratio calculation (would need risk-free rate for proper calculation)
-    const returns = userTrades.map(trade => parseFloat(trade.pnl || '0'));
-    const avgReturn = returns.reduce((sum, ret) => sum + ret, 0) / returns.length;
-    const stdDev = Math.sqrt(returns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / returns.length);
+    const returns = userTrades.map((trade: Trade) => trade.pnl ?? 0);
+    const avgReturn = returns.reduce((sum: number, ret: number) => sum + ret, 0) / returns.length;
+    const stdDev = Math.sqrt(returns.reduce((sum: number, ret: number) => sum + Math.pow(ret - avgReturn, 2), 0) / returns.length);
     const sharpeRatio = stdDev > 0 ? avgReturn / stdDev : 0;
 
     return {
@@ -296,7 +303,7 @@ export class DatabaseStorage implements IStorage {
 
     // Get all strategies used by the user
     const allStrategies = await db.select().from(strategies);
-    allStrategies.forEach(strategy => strategiesMap.set(strategy.id, strategy));
+    allStrategies.forEach((strategy: Strategy) => strategiesMap.set(strategy.id, strategy));
 
     // Group trades by strategy
     for (const trade of userTrades) {
@@ -317,13 +324,13 @@ export class DatabaseStorage implements IStorage {
     // Calculate performance metrics for each strategy
     const results = Array.from(performanceMap.values()).map(({ trades: strategyTrades, strategy }) => {
       const totalTrades = strategyTrades.length;
-      const winningTrades = strategyTrades.filter(trade => parseFloat(trade.pnl || '0') > 0);
-      const losingTrades = strategyTrades.filter(trade => parseFloat(trade.pnl || '0') < 0);
+      const winningTrades = strategyTrades.filter(trade => (trade.pnl ?? 0) > 0);
+      const losingTrades = strategyTrades.filter(trade => (trade.pnl ?? 0) < 0);
       
       const winRate = (winningTrades.length / totalTrades) * 100;
       
-      const grossProfit = winningTrades.reduce((sum, trade) => sum + parseFloat(trade.pnl || '0'), 0);
-      const grossLoss = Math.abs(losingTrades.reduce((sum, trade) => sum + parseFloat(trade.pnl || '0'), 0));
+      const grossProfit = winningTrades.reduce((sum, trade) => sum + (trade.pnl ?? 0), 0);
+      const grossLoss = Math.abs(losingTrades.reduce((sum, trade) => sum + (trade.pnl ?? 0), 0));
       const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? grossProfit : 0;
 
       // Calculate average grade
@@ -364,7 +371,7 @@ export class DatabaseStorage implements IStorage {
     .from(users)
     .where(sql`${users.betaStatus} IN ('approved', 'active', 'blocked') AND ${users.betaStatus} != 'deleted'`);
     
-    return allUsers.map(user => ({
+    return allUsers.map((user: any) => ({
       id: user.id,
       email: user.email,
       firstName: user.firstName || undefined,
@@ -383,6 +390,12 @@ export class DatabaseStorage implements IStorage {
     await db.delete(portfolioSnapshots).where(eq(portfolioSnapshots.userId, userId));
     // Finally, delete the user
     await db.delete(users).where(eq(users.id, userId));
+  }
+
+  async getTradesForPeriod(userId: number, period: string) {
+    // TODO: Implement actual DB query for trades in the given period
+    // For now, return all trades for user
+    return await this.getTrades(userId);
   }
 }
 
